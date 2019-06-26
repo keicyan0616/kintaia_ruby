@@ -7,11 +7,11 @@
     <%= form_for(@user, url: update_basic_info_path(params: {id: @user.id})) do |f| %>
       <%= render 'shared/error_messages', object: @user %>
 
-      <%= f.label :basic_time, "指定勤務時間" %>
-      <%= f.time_field :basic_time, class: 'form-control' %>
-
-      <%= f.label :work_time, "基本勤務時間" %>
+      <%= f.label :work_time, "指定勤務時間" %>
       <%= f.time_field :work_time, class: 'form-control' %>
+      
+      <%= f.label :basic_time, "基本勤務時間" %>
+      <%= f.time_field :basic_time, class: 'form-control' %>
 
       <%= f.submit "編集", class: "btn btn-primary" %>
     <% end %>

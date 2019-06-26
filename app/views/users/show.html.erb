@@ -21,17 +21,31 @@
     </tr>
   </table>
 
-  <%= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
+  <div class = "btn-csv">
+    <%= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
+    <%= link_to "CSV出力", "#", class: "btn btn-primary" %>
+  </div>
+  <div class = "btn-log">
+    <%= link_to "勤怠修正ログ(承認済み)", "#", class: "btn btn-primary" %>
+  </div>
 
   <table class = "table-bordered table-striped table-condensed">
     <thead>
       <tr> <!--rowspan:縦結合、colspan：横結合-->
-        <th rowspan = "2">日付</th>
-        <th rowspan = "2">曜日</th>
+        <th rowspan = "3">日付</th>
+        <th rowspan = "3">曜日</th>
+        <th colspan = "8">【実績】</th>
+        <th colspan = "5">所定外勤務</th>
+      </tr>
+      <tr>
         <th colspan = "3">出社</th>
         <th colspan = "3">退社</th>
         <th rowspan = "2">在社時間</th>
         <th rowspan = "2">備考</th>
+        <th colspan = "2">終了予定時間</th>
+        <th rowspan = "2">時間外時間</th>
+        <th rowspan = "2">業務書内容</th>
+        <th rowspan = "2">指示者確認㊞</th>
       </tr>
       <tr>
         <th>時</th>
@@ -40,6 +54,8 @@
         <th>時</th>
         <th>分</th>
         <th></th>
+        <th>時</th>
+        <th>分</th>
       </tr>
     </thead>
     <tbody>
@@ -119,6 +135,11 @@
             <% end %>
           </td>
           <td><%= day.note %></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
         </tr>
       <% end %>
     </tbody>
@@ -127,6 +148,11 @@
         <td colspan = "2"><%= format_basic_time(@user.basic_time).to_f * @worked_sum %></td>
         <td colspan = "6"></td>
         <td><%= working_times_sum(@total_seconds) unless @total_seconds.nil? %></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
         <td></td>
       </tr>
     </tfoot>
