@@ -1,0 +1,23 @@
+<% provide(:title, '一覧') %>
+
+<% if params[:search].present? %>
+  <h1>検索結果</h1>
+<% else %>
+  <h1>ユーザ一覧</h1>
+<% end %>
+
+<div class="user-search-name">
+<p>ユーザー名検索</p>
+</div>
+<%= form_tag(users_path, :method => 'get' ) do %>
+  <%= submit_tag '検索', :name => nil, class: "btn btn-primary btn-search" %>
+  <%= text_field_tag :search, '', placeholder: "キーワードを入力...", class: "form-control txt-search" %>
+<% end %>
+
+<%= will_paginate %>
+
+<ul class="users">
+  <%= render @users %>
+</ul>
+
+<%= will_paginate %>

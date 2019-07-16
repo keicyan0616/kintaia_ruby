@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  kintai_req_on: 2019-07-07
+  approval_status: MyString
+  app_target_person_id: 1
+  approval_at: 2019-07-07 16:28:04
+
+two:
+  user: two
+  kintai_req_on: 2019-07-07
+  approval_status: MyString
+  app_target_person_id: 1
+  approval_at: 2019-07-07 16:28:04

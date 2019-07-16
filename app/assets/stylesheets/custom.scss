@@ -143,8 +143,7 @@ input, textarea, select, .uneditable-input {
   margin: auto;
 }
 
-
-/* 勤怠表示・編集画面 */
+/* #### 勤怠表示・編集画面 ### */
 
 .txtSaturday {
   color: blue;
@@ -162,9 +161,33 @@ input, textarea, select, .uneditable-input {
   margin-bottom: 5px;
 }
 
+.btn-shinsei{
+  width: 120px;
+}
 
+.select-shonin{
+  width: 120px;
+  margin: auto;
+}
 
-/* ユーザー一覧画面 */
+/* 所属長承認申請のお知らせ*/
+.shozoku-info{
+  font-size: 120%;
+}
+.link-shozoku{
+  margin-top: 5px;
+}
+
+/* 勤怠変更申請のお知らせ*/
+.kintai-info{
+  font-size: 120%;
+}
+/* 残業申請のお知らせ*/
+.zangyou-info{
+  font-size: 120%;
+}
+
+/* ### ユーザー一覧画面 ### */
 .txt-search {
   width: 300px;
   /*margin-right: 80%;*/
@@ -183,4 +206,37 @@ input, textarea, select, .uneditable-input {
   margin:0 0 0 auto;
   width: 387px;
   font-weight: bold;
+}
+
+.btn-do-edit{
+  width: 100%;
+}
+
+/* 編集ボタン*/
+.btn-edit{
+  margin:20px 0px 20px 20px;
+  width: 85px;
+  height: 50px;
+  padding: 13px;
+}
+
+/* ### 勤怠承認画面 ### */
+/*
+.list-shinsei{
+  width: 85px;
+}
+*/
+
+.person_title{
+  margin:20px 0px 20px 40% ;
+}
+
+.btn-soushin{
+  margin:20px 0px 20px 45% ;
+  width: 165px;
+}
+
+/* モーダルウインドウの位置調整 */
+.modal-dialog-center {
+  padding-top: 10%;
 }

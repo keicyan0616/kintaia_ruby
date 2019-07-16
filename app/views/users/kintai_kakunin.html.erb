@@ -1,62 +1,57 @@
 <!--
 ###################################################
-# knt001_勤怠画面(上長、一般ユーザー混在)
+# knt002_勤怠確認画面(上長のみ閲覧OK)
 #
 #
 ###################################################
 -->
-<% provide(:title, '勤怠表示') %>
+<% provide(:title, '勤怠確認') %>
 <div>
   <!-- 勤怠画面 ヘッダー部 -->
   <table class = "table-bordered table-condensed">
     <tr>
       <td>
-        <%= link_to "←", user_path(params: {id: @user.id, first_day: @first_day.prev_month }),
+        <%#= link_to "←", user_path(params: {id: @user.id, first_day: @first_day.prev_month }),
                          class: "btn btn-xs btn-primary" %>
         &emsp;<%= @first_day.to_s(:year_month) %>　時間管理表&emsp;
-        <%= link_to "→", user_path(params: {id: @user.id, first_day: @first_day.next_month }),
+        <%#= link_to "→", user_path(params: {id: @user.id, first_day: @first_day.next_month }),
                          class: "btn btn-xs btn-primary" %>
       </td>
       <td>
         指定勤務開始時間　<%= format_basic_time(@user.work_time) %><br>
         指定勤務終了時間　<%= format_basic_time(@user.work_end_time) %> 
       </td>
-      <td colspan = "3">基本時間　<%= format_basic_time(@user.basic_time) %></td>
+      <td>基本時間　<%= format_basic_time(@user.basic_time) %></td>
       <td>初日　<%= @first_day.to_s(:date) %></td>
     </tr>
     <tr>
-      <td>所属　<%= @user.department.present? ? @user.department : "未設定" %></td>
-      <td>氏名　<%= @user.name %></td>
-      <td>コード</td>
-      <td><%= @user.employer_number %></td>
-      <td>出勤日数　<%= @worked_sum %>日</td>
+      <td>所属：<%= @user.department.present? ? @user.department : "未設定" %></td>
+      <td>氏名：<%= @user.name %></td>
+      <td>出勤日数：<%= @worked_sum %>日</td>
       <td>締日　<%= @last_day.to_s(:date) %></td>
     </tr>
   </table>
   
   <!-- お知らせボタン(文字列リンク)関係 -->
+  <!--
   <div class = "link-shozoku">
-    <% if @apr_cnt >= 1 %>
-      <% message_set = " #{@apr_cnt}件の通知があります" %>
-      <% color_set = "red" %>
-    <% else %>
-      <% message_set = "" %>
-      <% color_set = "" %>
-    <% end %>
-    <%= link_to "【所属長承認申請のお知らせ】#{message_set}", shinsei_kintai_path(@user), remote: true, class: "shozoku-info", :style=>"color:#{color_set}" %>
+    <%#= link_to "【所属長承認申請のお知らせ】", shinsei_kintai_path(@user), remote: true, class: "shozoku-info", :style=>"color:red" %>
   </div>
-  <div><%= link_to "【勤怠変更申請のお知らせ】", "#", class: "kintai-info" %></div>
-  <div><%= link_to "【残業申請のお知らせ】", "#", class: "zangyou-info" %></div>
+  <div><%#= link_to "【勤怠変更申請のお知らせ】", "#", class: "kintai-info" %></div>
+  <div><%#= link_to "【残業申請のお知らせ】", "#", class: "zangyou-info" %></div>
+  -->
   
   <!-- 各種機能ボタン関係 -->
+  <!--
   <div class = "btn-csv">
-    <%= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
-    <%= link_to "CSV出力", "#", class: "btn btn-primary" %>
+    <%#= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
+    <%#= link_to "CSV出力", "#", class: "btn btn-primary" %>
   </div>
   <div class = "btn-log">
-    <%= link_to "勤怠修正ログ(承認済み)", "#", class: "btn btn-primary" %>
+    <%#= link_to "勤怠修正ログ(承認済み)", "#", class: "btn btn-primary" %>
   </div>
-
+  -->
+  <div>&emsp;</div>
   <!-- 勤怠明細部 -->
   <table class = "table-bordered table-striped table-condensed">
     <thead>
@@ -94,15 +89,13 @@
           css_class = 
           case %w{日 月 火 水 木 金 土}[day.worked_on.wday]
           when '土'
-            #'text-primary'
             'txtSaturday'
           when '日'
-            #'text-danger'
             'txtSunday'
           end
         %>
         <tr>
-          <td><%= link_to "残業申請", "#", class: "btn btn-primary btn-zan-shinsei" %></td>
+          <td><%#= link_to "残業申請", "#", class: "btn btn-primary btn-zan-shinsei" %></td>
           <td><%= day.worked_on.to_s(:date) %></td>
           <td class="<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[day.worked_on.wday] %></td>
           <td><%= day.started_at.to_s(:hour) if day.started_at.present? %></td>
@@ -127,14 +120,13 @@
           </td>
           <!-- 出社ボタン表示 -->
           <td>
-            <% if day.worked_on == Date.today && day.started_at.nil? %>
-              <%= button_to "出社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
-            <% end %>
+            <%# if day.worked_on == Date.today && day.started_at.nil? %>
+              <%#= button_to "出社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
+            <%# end %>
           </td>
           <!-- 退勤時間表示 -->
           <td><%= day.finished_at.to_s(:hour) if day.finished_at.present? %></td>
           <td>
-            <%#= day.finished_at.to_s(:min) if day.finished_at.present? %>
             <% if day.finished_at.present? %>
               <% if day.finished_at.to_s(:min).to_i >= 0 && day.finished_at.to_s(:min).to_i <= 14 %>
                 <%= "00" %>
@@ -154,9 +146,9 @@
             <% end %>
           </td>
           <td>
-            <% if day.worked_on == Date.today && day.started_at.present? && day.finished_at.nil? %>
-              <%= button_to "退社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
-            <% end %>
+            <%# if day.worked_on == Date.today && day.started_at.present? && day.finished_at.nil? %>
+              <%#= button_to "退社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
+            <%# end %>
           </td>
           <!-- 在社時間(計算) -->
           <td>
@@ -190,13 +182,13 @@
         <td></td>
         <td></td>
         <td>
-          <div>所属長承認 未 <%= @apr_status %><div>
+          <div>所属長承認 未<div>
           <div class = 'select-shonin'>
-          <%= form_for @user do |f| %>
-            <%= f.select :name, User.all.map{|o| [o.name, o.id]}, :include_blank => true %>
-          <% end %>
+          <%#= form_for @user do |f| %>
+            <%#= f.select :name, User.all.map{|o| [o.name, o.id]}, :include_blank => true %>
+          <%# end %>
           </div>
-          <%= link_to "申請", "#", class: "btn btn-primary btn-shinsei" %>
+          <%#= link_to "申請", "#", class: "btn btn-primary btn-shinsei" %>
         </td>
       </tr>
     </tfoot>
@@ -204,4 +196,4 @@
 </div>
 
 <!--モーダルウインドウ表示-->
-<div id="kintai-shinsei" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<!--<div id="kintai-shinsei" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>-->

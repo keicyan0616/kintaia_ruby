@@ -1,3 +1,11 @@
+<!--
+###################################################
+# knr001_管理者画面(ユーザー一覧)
+#
+#
+###################################################
+-->
+
 <% provide(:title, '一覧') %>
 
 <% if params[:search].present? %>
@@ -6,18 +14,50 @@
   <h1>ユーザ一覧</h1>
 <% end %>
 
-<div class="user-search-name">
-<p>ユーザー名検索</p>
+<form  action="">
+  <!--ファイルを選択
+  <input id="filename" readonly type="text" value="" ><button type="button" id="select_file_button">選択</button> -->
+  <input id="file_button" type="file" />
+  <!-- <input type="submit" name="commit" value="プロフィール編集を完了する" /></div>-->
+</form>
+
+<div class = "btn-csv-upload">
+  <%= link_to "CSVをインポート", "#", class: "btn btn-primary" %>
 </div>
-<%= form_tag(users_path, :method => 'get' ) do %>
-  <%= submit_tag '検索', :name => nil, class: "btn btn-primary btn-search" %>
-  <%= text_field_tag :search, '', placeholder: "キーワードを入力...", class: "form-control txt-search" %>
-<% end %>
 
-<%= will_paginate %>
+<p></p>
 
+<!-- ユーザー(_user.html)ページ表示 -->
 <ul class="users">
   <%= render @users %>
 </ul>
 
-<%= will_paginate %>
+
+<!--
+<%#= form_for(hogehoge) do |f| %>
+  <div>
+    <%#= f.label :file %>
+    <%#= f.file_field :file, id: 'elmFile', onchange: 'selectFile()' %>
+  </div>
+
+  <div>
+    <%#= f.submit 'アップロード', id: 'btnUPload', disabled: true %>
+  </div>
+<#% end %>
+
+<div class="user-search-name">
+<p>ユーザー名検索</p>
+</div>
+<%#= form_tag(users_path, :method => 'get' ) do %>
+  <%#= submit_tag '検索', :name => nil, class: "btn btn-primary btn-search" %>
+  <%#= text_field_tag :search, '', placeholder: "キーワードを入力...", class: "form-control txt-search" %>
+<%# end %>
+
+<%#= will_paginate %>
+
+<ul class="users">
+  <%#= render @users %>
+</ul>
+
+<%#= will_paginate %>
+-->

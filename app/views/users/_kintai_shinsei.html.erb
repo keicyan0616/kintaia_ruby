@@ -1,0 +1,61 @@
+<!--
+###################################################
+# kns001_一般or上長ユーザー画面(勤怠申請画面)
+#
+#
+###################################################
+-->
+
+<% provide(:title, '勤怠申請') %>
+
+<div class="modal-dialog modal-lg modal-dialog-center">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      
+      <div>
+      <%= form_for(@user, url: soushin_kintai_path, method: :patch) do |fapr| %>
+      
+        <% target_person_id_tmp = -1 %>
+        <% @apr.each do |app_data| %>
+          <% if target_person_id_tmp != app_data.target_person_id %>
+            <% @user_tmp = User.find_by(id: app_data.target_person_id) %>
+            <div class = "person_title">【<%= @user_tmp.name %>からの1ヶ月分勤怠申請】</div>
+          <% end %>
+          <% target_person_id_tmp = app_data.target_person_id %>
+      
+          <!-- 勤怠画面 ヘッダー部 -->
+          <table class = "table-bordered table-condensed">
+            <tr>
+              <td>月</td>
+              <td>指示者確認㊞</td>
+              <td>変更</td>
+              <td>勤怠を確認する</td>
+            </tr>
+            <tr>
+              <!-- 上長IDで探したときに見つかったtarget_person_id（申請対象者ID）の勤怠申請を取得する -->
+              <td><%= app_data.kintai_req_on %></td>
+              <td>
+                <% @app_tmp = app_data.id %>
+                <% @app_status = app_data.approval_status %>
+                <%= select_tag "note#{@app_tmp.to_s}", options_for_select(["","申請中", "承認", "否認"], :selected => "#{@app_status}") %>
+                <%#= form_for app_data do |f| %>
+                  <%#= f.select :approval_status, [["なし", "なし"], ["申請中", "申請中"], ["承認", "承認"], ["否認", "否認"]], :prompt => "選択してください", class: "list-shinsei" %>
+                <%# end %>
+              </td>
+              <td><%= check_box_tag :"shiji_kakunin#{@app_tmp.to_s}" %></td>
+              <td><%= link_to "確認", "#{target_person_id_tmp.to_s}/#{app_data.kintai_req_on}/kintai_kakunin" , class: "btn btn-primary" %></td>
+              <!-- <td><%#= link_to "確認", user_path(params: {id: @user.id, first_day: @first_day.prev_month}), class: "btn btn-primary" %></td> -->
+            </tr>
+          </table>
+        <% end %>
+        <div><%= fapr.submit "変更を送信する", class: "btn btn-primary btn-soushin" %><%#= link_to "変更を送信する", soushin_kintai_path(@user), class: "btn btn-primary btn-soushin" %></div>
+        
+      <% end %>
+      </div>
+      
+    </div>
+  </div>
+</div>
