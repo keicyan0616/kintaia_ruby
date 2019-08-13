@@ -14,7 +14,7 @@
         <% end %>
         
         <% if logged_in? %>
-          <% if current_user.admin? %>
+          <% if current_user.senior? %>
             <li><%= link_to "ユーザ一覧", users_path %></li>
             <li><%= link_to "出勤社員一覧", users_path %></li>
             <li><%= link_to "拠点情報の修正", users_path %></li>

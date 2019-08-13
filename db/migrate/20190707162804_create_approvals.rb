@@ -4,7 +4,7 @@ class CreateApprovals < ActiveRecord::Migration[5.1]
       t.references :user, foreign_key: true
       t.date :kintai_req_on
       t.string :approval_status
-      t.integer :app_target_person_id
+      t.integer :target_person_id
       t.datetime :approval_at
 
       t.timestamps

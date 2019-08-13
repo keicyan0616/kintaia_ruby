@@ -1,0 +1,82 @@
+<% provide(:title, "残業申請" ) %>
+
+<div class="modal-dialog modal-lg modal-dialog-center">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      
+      <div>
+        <h1>【残業申請】</h1>
+        
+  <%= form_for(@user, url: update_zangyo_attendances_path, method: :patch) do |f| %>
+    <table class = "table-bordered table-striped table-condensed">
+      <thead>
+        <tr>
+          <th>日付</th>
+          <th>曜日</th>
+          <th>終了予定時間</th>
+          <th>翌日</th>
+          <th>業務処理内容</th>
+          <th>指示者確認㊞</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%# @dates.each do |day| %>
+          <% 
+            css_class = 
+            case %w{日 月 火 水 木 金 土}[@slct_day.wday]
+            when '土'
+              'txtSaturday'
+            when '日'
+              'txtSunday'
+            end
+          %>
+          <%= fields_for "attendances[]", @attendance do |af| %>
+            <tr>
+              <td><%= @slct_day.strftime("%m/%d") %><%#= day.worked_on.to_s(:date) %></td>
+              <td class="<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[@slct_day.wday] %></td>
+              <td><%= af.time_field :finished_plan_at, class: "form-control" %></td>
+              <td><%= check_box_tag :"yokujitsu_kakunin" %></td>
+              <td><%= af.text_field :gyomu_memo, class: "form-control" %></td>
+              <td>
+                <div class = 'select-zangyo-shonin'>
+                  <%= f.select :name, User.where(senior: true).map{|o| [o.name, o.id]}, {:include_blank => true}, {class: "select-zangyo-shonin2"} %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <%# end %>
+      </tbody>
+    </table>
+    <p></p>
+    <div class="btn-attendances-update">
+      <%= f.submit "変更を送信する", class: "btn btn-primary" %>
+      <%#= link_to "キャンセル", user_path(@user, params:{first_day: @first_day }), class: "btn btn-default btn-block" %>
+    </div>
+  <% end %>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+              <!--<td class="<%#= css_class %>"><%#= %w{日 月 火 水 木 金 土}[day.worked_on.wday] %></td>
+              
+              <!--時間入力不可制御フラグの設定
+              <%# if day.worked_on > Date.today %>
+                <%# readOnlyFlg = true %>
+              <%# else %>
+                <%# readOnlyFlg = false %>
+              <%# end %>
+              
+              <td><%#= af.time_field :started_at, class: "form-control", readonly: readOnlyFlg %></td>
+              <td><%#= af.time_field :finished_at, class: "form-control", readonly: readOnlyFlg %></td>
+              <td>
+                <%# if day.started_at.present? && day.finished_at.present? %>
+                  <%#= working_times(day.started_at, day.finished_at) %>
+                <%# end %>
+              </td>
+              <td><%#= af.text_field :note, class: "form-control", readonly: readOnlyFlg %></td>
+              -->

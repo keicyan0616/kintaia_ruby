@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190715140206) do
+ActiveRecord::Schema.define(version: 20190805153307) do
 
   create_table "approvals", force: :cascade do |t|
     t.integer "user_id"
@@ -31,6 +31,8 @@ ActiveRecord::Schema.define(version: 20190715140206) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "gyomu_memo"
+    t.datetime "finished_plan_at"
     t.index ["user_id"], name: "index_attendances_on_user_id"
   end
 
@@ -49,6 +51,19 @@ ActiveRecord::Schema.define(version: 20190715140206) do
     t.boolean "senior"
     t.integer "employer_number"
     t.string "uid"
+  end
+
+  create_table "zangyoaprvls", force: :cascade do |t|
+    t.integer "user_id"
+    t.date "zangyo_aprvl_req_on"
+    t.datetime "zangyo_finished_at"
+    t.string "zangyo_note"
+    t.string "zangyo_aprvl_status"
+    t.integer "zangyo_target_person_id"
+    t.datetime "approval_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_zangyoaprvls_on_user_id"
   end
 
 end

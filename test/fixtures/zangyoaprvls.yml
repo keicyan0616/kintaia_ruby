@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  zangyo_aprvl_req_on: 2019-07-28
+  zangyo_finished_at: 2019-07-28 02:34:34
+  zangyo_note: MyString
+  zangyo_aprvl_status: MyString
+  zangyo_target_person_id: 1
+  approval_at: 2019-07-28 02:34:34
+
+two:
+  user: two
+  zangyo_aprvl_req_on: 2019-07-28
+  zangyo_finished_at: 2019-07-28 02:34:34
+  zangyo_note: MyString
+  zangyo_aprvl_status: MyString
+  zangyo_target_person_id: 1
+  approval_at: 2019-07-28 02:34:34

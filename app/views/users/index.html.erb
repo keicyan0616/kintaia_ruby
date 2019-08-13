@@ -28,10 +28,13 @@
 <p></p>
 
 <!-- ユーザー(_user.html)ページ表示 -->
+<%= will_paginate %>
+
 <ul class="users">
   <%= render @users %>
 </ul>
 
+<%= will_paginate %>
 
 <!--
 <%#= form_for(hogehoge) do |f| %>
