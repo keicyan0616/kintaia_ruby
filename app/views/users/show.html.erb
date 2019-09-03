@@ -35,7 +35,7 @@
   </table>
   
   <!-- お知らせボタン(文字列リンク)関係 -->
-  <% if current_user.senior? %>
+  <% if current_user.superior? %>
     <div class = "link-shozoku">
       <% if @apr_cnt >= 1 %>
         <% message_set = " #{@apr_cnt}件の通知があります" %>
@@ -62,7 +62,7 @@
   <!-- 各種機能ボタン関係 -->
   <div class = "btn-csv">
     <%= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
-    <%= link_to "CSV出力", "#", class: "btn btn-primary" %>
+    <%= link_to "CSV出力", export_csv_path(@user, @first_day, format: :csv), class: "btn btn-primary" %>
   </div>
   <div class = "btn-log">
     <%= link_to "勤怠修正ログ(承認済み)", "#", class: "btn btn-primary" %>
@@ -183,17 +183,35 @@
           <td><%= day.note %></td>
           <!-- 残業申請データの取得(原則1件のみのためfind_byを使用) -->
           <% @zangyo_shinsei_data = Zangyoaprvl.find_by(zangyo_target_person_id: params[:id], zangyo_aprvl_req_on: "#{day.worked_on}") %>
-          <!-- 終了予定時間(時) -->
-          <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.present? %><%#= day.finished_plan_at.to_s(:hour) if day.finished_plan_at.present? %></td>
-          <!-- 終了予定時間(分) -->
-          <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:min) if @zangyo_shinsei_data.present? %><%#= day.finished_plan_at.to_s(:min) if day.finished_plan_at.present? %></td>
-          <!-- 時間外時間 -->
-          <%# @calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900") %>
-          <td><%#= working_times(@calc_work_datetime, zangyo_data.zangyo_finished_at) %></td>
-          <!-- 業務処理内容 -->
-          <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.present? %><%#= day.gyomu_memo %></td>
-          <!-- 指示者確認㊞ -->
-          <td><%= @zangyo_shinsei_data.zangyo_aprvl_status if @zangyo_shinsei_data.present? %></td>
+          <% if @zangyo_shinsei_data.present? %>
+            <!-- 終了予定時間(時) -->
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:hour) if day.finished_plan_at.present? %></td>
+            <!-- 終了予定時間(分) -->
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:min) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:min) if day.finished_plan_at.present? %></td>
+            <!-- 時間外時間 -->
+            <% @calc_work_datetime = Time.parse(@zangyo_shinsei_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @user.work_end_time.strftime("%H:%M") + " +0900") %>
+            <td><%= working_times(@calc_work_datetime, @zangyo_shinsei_data.zangyo_finished_at) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
+            <!-- 業務処理内容 -->
+            <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %><%#= day.gyomu_memo %></td>
+            <!-- 指示者確認㊞ -->
+            <% zangyo_aprvl_status_l = @zangyo_shinsei_data.zangyo_aprvl_status %>
+            <% if zangyo_aprvl_status_l == "申請中" %>
+            <%   zangyo_status_msg = "残業申請中" %>
+            <% elsif zangyo_aprvl_status_l == "否認" %>
+            <%   zangyo_status_msg = "残業否認" %>
+            <% elsif zangyo_aprvl_status_l == "承認" %>
+            <%   zangyo_status_msg = "残業承認済" %>
+            <% else %>
+            <%   zangyo_status_msg = "" %>
+            <% end%>
+            <td><%= zangyo_status_msg %></td>
+          <% else%>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>
@@ -213,7 +231,7 @@
           <%#= form_for @user do |f| %>
           <%= form_for(@user, url: month_shinsei_path(params: {id: @user.id, first_day: @first_day}), method: :patch) do |f| %>
             <div class = 'select-shonin'>
-              <%= f.select :name, User.where(senior: true).map{|o| [o.name, o.id]}, :include_blank => true %>
+              <%= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, :include_blank => true %>
             </div>
             <%= f.submit "申請", class: "btn btn-primary btn-shinsei" %>
           <% end %>

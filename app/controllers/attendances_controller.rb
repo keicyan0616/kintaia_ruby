@@ -16,6 +16,7 @@ class AttendancesController < ApplicationController
     redirect_to @user
   end
   
+  # ### 1．勤怠編集関係 ######
   # --- 勤怠編集画面 表示 -----
   def edit
     @user = User.find(params[:id])
@@ -40,74 +41,137 @@ class AttendancesController < ApplicationController
     end
   end
   
-  # --- 残業申請画面 表示 -----
+  # ### 2．残業申請(申請者側)関係 ######
+  # 2-1．モーダル表示（残業申請モーダル画面）
   def zangyo_shinsei
     logger.debug "ここを通ったよ(010)"
     @user = User.find(params[:id])
     @slct_day = Date.strptime(params[:date]) #.to_s(:date)
-    @attendance = @user.attendances.find_by(worked_on: params[:date])
+    #@attendance = @user.attendances.find_by(worked_on: params[:date]) #もう不要かも
+    
+    #更新データの取得(モーダル画面とDBのリンク付け)
+    @zangyoaprvl = Zangyoaprvl.find_by(zangyo_aprvl_req_on: params[:date], zangyo_target_person_id: params[:id])
+    unless @zangyoaprvl.present? 
+      #更新データがない場合、一旦、承認者を自分のIDでデータ作成(モーダル画面表示するため)
+      @zangyoaprvl = Zangyoaprvl.new(user_id: params[:id], zangyo_aprvl_req_on: params[:date], zangyo_target_person_id: params[:id], yuko_flag: 0)
+      @zangyoaprvl.save
+    end
+    
+    @shonin_id_show = 0
+    if @zangyoaprvl.present? && @zangyoaprvl.yuko_flag == 1
+      @shonin_id_show = @zangyoaprvl.user_id
+    end
     #@first_day = first_day(params[:date])
     #@last_day = @first_day.end_of_month
     #@attend_date = Attendance.find(1)
     #@dates = user_attendances_month_date
   end
   
-  # 残業申請画面 更新送信
+  # 2-2．変更送信（残業申請モーダル画面）
   def zangyo_update
     logger.debug "ここを通ったよ(011)"
-    @user = User.find(params[:id])
-    @slct_date = params[:date]
-    @shinsei_id = params[:user][:name]
+    
+    #各種値を取得
+    @user = User.find(params[:id])                                      #残業申請者ID
+    @slct_date = params[:date]                                          #残業申請日
+    @yokujitsu_kakunin_check = params[:"yokujitsu_kakunin"]             #翌日(チェック)
+    @shonin_id = params[:user][:name]                                   #残業承認者ID
     #@attendance = @user.attendances.find_by(worked_on: params[:date])
     #if attendances_invalid?
-    @yokujitsu_kakunin_check = params[:"yokujitsu_kakunin"]
+
+    #残業申請日の申請済みデータの取得(有無チェック用)
+    @zangyo_apr_count = Zangyoaprvl.where(zangyo_aprvl_req_on: @slct_date).where(zangyo_target_person_id: @user.id).where(zangyo_aprvl_status: "申請中").where(yuko_flag: 1).count
+    #@zangyo_apr_count = Zangyoaprvl.where(zangyo_aprvl_req_on: @slct_date).where(zangyo_target_person_id: @user.id).where.not(zangyo_finished_at: nil).where.not(zangyo_aprvl_status: "承認").where(yuko_flag: 1).count
     
-    #@zangyo_apr_check_exist = ZangyoAprvl.find_by(user_id: @shinsei_id, zangyo_aprvl_req_on: @slct_date, zangyo_target_person_id: @user.id)
-    #if @zangyo_apr_check_exist
-    #  flash[:danger] = "既に申請済みです。"
-    #else
-      @zangyo_apr_exist = Zangyoaprvl.find_by(user_id: @shinsei_id, zangyo_aprvl_req_on: @slct_date, zangyo_target_person_id: @user.id)
+    #残業申請データの登録
+    if @zangyo_apr_count > 0
+      flash[:danger] = "既に申請済みです。"
+    else
+      #承認済みデータの無効化
+      #@zangyo_apr_finished = Zangyoaprvl.where(zangyo_aprvl_req_on: @slct_date).where(zangyo_target_person_id: @user.id).where.not(zangyo_finished_at: nil).where(zangyo_aprvl_status: "承認").where(yuko_flag: 1).count
       
-      if @zangyo_apr_exist
-        flash[:danger] = "既に申請済みです。"
-      #elsif @shinsei_id == ""
-      #  flash[:info] = "申請者を選択してください。"
-      else
-        attendances_zangyo_params.each do |id, item|
-          attendance = Attendance.find(id)
-          attendance.update_attributes(item)
-          @gyomu_memo = attendance.gyomu_memo
-          
+      zangyoaprvl_params.each do |id, item|
+        @gyomu_memo_tmp = params[:zangyoaprvls][id][:zangyo_note]                 #業務処理内容
+        @finished_plan_time_tmp = params[:zangyoaprvls][id][:zangyo_finished_at]  #終了予定時間
+        #入力チェック
+        if @finished_plan_time_tmp == ""
+          flash[:danger] = "「終了予定時間」を入力してください。"
+        elsif @gyomu_memo_tmp == "" 
+          flash[:danger] = "「業務処理内容」を入力してください。"
+        elsif @shonin_id == ""
+          flash[:danger] = "「指示者確認㊞」を選択してください。"
+        else
+          #対象データの取得と更新
+          zangyoaprvl = Zangyoaprvl.find(id)
+          zangyoaprvl.update_attributes(item)
+          @gyomu_memo = zangyoaprvl.zangyo_note                              #業務処理内容
+          @finished_plan_time = zangyoaprvl.zangyo_finished_at               #終了予定時間
+
+          @finished_plan_at = Time.parse(@slct_date + " " + @finished_plan_time.strftime("%H:%M") + " +0900")
+          #残業時間申請日時の翌日設定
           if @yokujitsu_kakunin_check == "1" then
-            @finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
-          else  
-            @finished_plan_at = Time.parse(attendance.worked_on.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
+            #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
+            @finished_plan_at = @finished_plan_at.tomorrow
           end
           #@calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900")
+
+          #@zangyo_apr = Zangyoaprvl.new(user_id: @shonin_id, zangyo_aprvl_req_on: @slct_date, zangyo_aprvl_status: "申請中", zangyo_finished_at: @finished_plan_at.to_s, 
+                                        #zangyo_note: @gyomu_memo.to_s, zangyo_target_person_id: @user.id, yuko_flag: 1)
+          #@zangyo_apr.save 
+          zangyoaprvl.user_id = @shonin_id
+          zangyoaprvl.zangyo_aprvl_req_on = @slct_date
+          zangyoaprvl.zangyo_aprvl_status = "申請中"
+          zangyoaprvl.zangyo_finished_at = @finished_plan_at.to_s
+          zangyoaprvl.zangyo_note = @gyomu_memo.to_s
+          zangyoaprvl.zangyo_target_person_id = @user.id
+          zangyoaprvl.yuko_flag = 1
+          zangyoaprvl.save
+          flash[:success] = "残業申請を送信しました。"
         end
-        ##### まだこの辺りを直さないといけない #####
-        # updateにしないといけない
-        @zangyo_apr = Zangyoaprvl.new(user_id: @shinsei_id, zangyo_aprvl_req_on: @slct_date, zangyo_aprvl_status: "申請中", zangyo_finished_at: @finished_plan_at.to_s, 
-                                    zangyo_note: @gyomu_memo.to_s, zangyo_target_person_id: @user.id)
-        @zangyo_apr.save 
-        flash[:success] = '残業申請を送信しました。'
-        #flash[:success] = "申請を送信しました。" # + @num.to_s
       end
-      #flash[:success] = "申請を送信しました。" # + @num.to_s      
-      #zangyo_app_data.zangyo_aprvl_status = params[:"note#{@app_tmp.to_s}"]
-      #zangyo_app_data.save
-      ############################################
-          
+    end
+    ############################################
+    #zangyo_app_data.zangyo_aprvl_status = params[:"note#{@app_tmp.to_s}"]
+    #zangyo_app_data.save
       
-      #redirect_to user_path(@user, params:{first_day: params[:date]})
+    #redirect_to user_path(@user, params:{first_day: params[:date]})
     #else
       #flash[:danger] = "不正な時間入力がありました、再入力してください。"
       #redirect_to edit_attendances_path(@user, params[:date])
     #end
     #end
 
+    # 勤怠画面(トップ画面)を再表示
     @first_day_l = Date.strptime(params[:date]).beginning_of_month
     redirect_to user_path(@user, params:{first_day: @first_day_l})
+  end
+
+  # ### 3．出勤中社員一覧関係 ######
+  def shukkin_list
+    @users = User.all
+    @shukkin_users = []
+
+    @users.each do |user| 
+      if @attendances = user.attendances.find_by(worked_on: Date.today, finished_at: nil)
+        @shukkin_users.push(user) if @attendances.started_at.present?
+        #debugger
+      end
+    end
+  end
+
+  # ### CSV出力ボタン押下時 #####
+  def export
+    logger.debug "ここを通ったよ(015)"
+    @user = User.find(params[:id])
+    @first_day = first_day(params[:date])
+    @last_day = @first_day.end_of_month
+    @attendances = @user.attendances.where("worked_on >= ?", @first_day).where("worked_on <= ?", @last_day)
+
+    respond_to do |format|
+      format.csv do
+        send_data render_to_string, filename: "hoge.csv", type: :csv
+      end
+    end
   end
 
   private
@@ -116,8 +180,12 @@ class AttendancesController < ApplicationController
     end
     
     def attendances_zangyo_params
-      params.permit(attendances: [:finished_plan_at, :gyomu_memo])[:attendances]
-      #params.permit(attendances: [:finished_at, :note])[:attendances]
+      #params.permit(attendances: [:finished_plan_at, :gyomu_memo])[:attendances]
+      params.permit(attendances: [:finished_at])[:attendances]
+    end
+    
+    def zangyoaprvl_params
+      params.permit(zangyoaprvls: [:zangyo_finished_at, :zangyo_note])[:zangyoaprvls]
     end
     
     # 正しいユーザー、または、管理者ユーザーかどうか確認

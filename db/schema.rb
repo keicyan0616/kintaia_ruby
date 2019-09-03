@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190805153307) do
+ActiveRecord::Schema.define(version: 20190831050342) do
 
   create_table "approvals", force: :cascade do |t|
     t.integer "user_id"
@@ -31,9 +31,14 @@ ActiveRecord::Schema.define(version: 20190805153307) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "gyomu_memo"
-    t.datetime "finished_plan_at"
     t.index ["user_id"], name: "index_attendances_on_user_id"
+  end
+
+  create_table "baseplaces", force: :cascade do |t|
+    t.string "kyoten_name"
+    t.string "kyoten_shurui"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
@@ -41,16 +46,16 @@ ActiveRecord::Schema.define(version: 20190805153307) do
     t.string "email"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "password_digest"
-    t.boolean "admin"
     t.string "department"
-    t.datetime "basic_time", default: "2019-02-19 22:30:00"
-    t.datetime "work_time", default: "2019-02-19 23:00:00"
-    t.string "remember_digest"
-    t.datetime "work_end_time", default: "2019-02-19 23:00:00"
-    t.boolean "senior"
     t.integer "employer_number"
     t.string "uid"
+    t.datetime "basic_time", default: "2019-02-19 22:30:00"
+    t.datetime "work_time", default: "2019-02-19 23:00:00"
+    t.datetime "work_end_time", default: "2019-02-19 23:00:00"
+    t.boolean "superior"
+    t.boolean "admin"
+    t.string "password_digest"
+    t.string "remember_digest"
   end
 
   create_table "zangyoaprvls", force: :cascade do |t|
@@ -63,6 +68,7 @@ ActiveRecord::Schema.define(version: 20190805153307) do
     t.datetime "approval_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "yuko_flag"
     t.index ["user_id"], name: "index_zangyoaprvls_on_user_id"
   end
 

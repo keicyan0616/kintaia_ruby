@@ -1,6 +1,6 @@
 <!--
 ###################################################
-# zns002_上長ユーザー画面(残業申請画面)
+# zns002_残業申請承認画面(上長ユーザーのみ、モーダル表示)
 #
 #
 ###################################################
@@ -20,68 +20,78 @@
       
         <% target_person_id_tmp = -1 %>
         <% @zangyo_apr.each do |zangyo_data| %>
+
           <% if target_person_id_tmp != zangyo_data.zangyo_target_person_id %>
+            <% if target_person_id_tmp != -1 %>
+              </table>
+            <% end %>
+
             <% @target_user = User.find_by(id: zangyo_data.zangyo_target_person_id) %>
             <div class = "person_title">【<%= @target_user.name %>からの残業申請】</div>
+            
+            <!-- 勤怠画面 ヘッダー部 -->
+            <table class = "table-bordered table-condensed">
+              <tr>
+                <td>日付</td>
+                <td>曜日</td>
+                <td>終了予定時間</td>
+                <td>指定勤務終了時間</td>
+                <td>時間外時間</td>
+                <td>業務処理内容</td>
+                <td>指示者確認㊞</td>
+                <td>変更</td>
+                <td>勤怠を確認する</td>
+              </tr>
           <% end %>
+
           <% target_person_id_tmp = zangyo_data.zangyo_target_person_id %>
-      
-          <!-- 勤怠画面 ヘッダー部 -->
-          <table class = "table-bordered table-condensed">
-            <tr>
-              <td>日付</td>
-              <td>曜日</td>
-              <td>終了予定時間</td>
-              <td>指定勤務終了時間</td>
-              <td>時間外時間</td>
-              <td>業務処理内容</td>
-              <td>指示者確認㊞</td>
-              <td>変更</td>
-              <td>勤怠を確認する</td>
-            </tr>
-            <% 
-              css_class = 
-              case %w{日 月 火 水 木 金 土}[zangyo_data.zangyo_aprvl_req_on.wday]
-              when '土'
-                'txtSaturday'
-              when '日'
-                'txtSunday'
-              end
-            %>
-            <!-- 上長IDで探したときに見つかったzangyo_target_person_id（申請対象者ID）の勤怠申請を取得する -->
-            <tr>
-              <!-- 日付 -->
-              <td><%= zangyo_data.zangyo_aprvl_req_on.to_s(:date) %></td>
-              <!-- 曜日 -->
-              <td class="<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[zangyo_data.zangyo_aprvl_req_on.wday] %></td>
-              <!-- 終了予定時間 -->
-              <td><%= zangyo_data.zangyo_finished_at.strftime("%Y-%m-%d %H:%M") %></td>
-              <!-- 指定勤務終了時間 -->
-              <td>
-                <% @target_user = User.find_by(id: zangyo_data.zangyo_target_person_id) %>
-                <%= @target_user.work_end_time.strftime("%H:%M") %>
-              </td>
-              <!-- 時間外時間 -->
-              <% @calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900") %>
-              <td><%= working_times(@calc_work_datetime, zangyo_data.zangyo_finished_at) %></td>
+          <% 
+            css_class = 
+            case %w{日 月 火 水 木 金 土}[zangyo_data.zangyo_aprvl_req_on.wday]
+            when '土'
+              'txtSaturday'
+            when '日'
+              'txtSunday'
+            end
+          %>
+          <!-- 上長IDで探したときに見つかったzangyo_target_person_id（申請対象者ID）の勤怠申請を表示する -->
+          <tr>
+            <!-- 日付 -->
+            <td><%= zangyo_data.zangyo_aprvl_req_on.to_s(:date) %></td>
+            <!-- 曜日 -->
+            <td class="<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[zangyo_data.zangyo_aprvl_req_on.wday] %></td>
+            <!-- 終了予定時間 -->
+            <td><%= zangyo_data.zangyo_finished_at.strftime("%H:%M") %></td>
+            <!-- 指定勤務終了時間 -->
+            <td>
+              <% @target_user = User.find_by(id: zangyo_data.zangyo_target_person_id) %>
+              <%= @target_user.work_end_time.strftime("%H:%M") %>
+            </td>
+            <!-- 時間外時間 -->
+            <% @calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900") %>
+            <td><%= working_times(@calc_work_datetime, zangyo_data.zangyo_finished_at) %></td>
               
-              <%#= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
+            <%#= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
               
-              <!-- 業務処理内容 -->
-              <td><%= zangyo_data.zangyo_note %></td>
-              <!-- 指示者確認㊞ -->
-              <td>
-                <% @zan_data_id = zangyo_data.id %>
-                <% @zan_data_status = zangyo_data.zangyo_aprvl_status %>
-                <%= select_tag "note#{@zan_data_id.to_s}", options_for_select(["","申請中", "承認", "否認"], :selected => "#{@zan_data_status}") %>
-              </td>
-              <!-- 変更 -->
-              <td><%= check_box_tag :"zangyo_shiji_kakunin#{@zan_data_id.to_s}" %></td>
-              <!-- 勤怠を確認する -->
-              <td><%= link_to "確認", "#{target_person_id_tmp.to_s}/#{zangyo_data.zangyo_aprvl_req_on.beginning_of_month}/kintai_kakunin" , class: "btn btn-primary" %></td>
-            </tr>
+            <!-- 業務処理内容 -->
+            <td><%= zangyo_data.zangyo_note %></td>
+            <!-- 指示者確認㊞ -->
+            <td>
+              <% @zan_data_id = zangyo_data.id %>
+              <% @zan_data_status = zangyo_data.zangyo_aprvl_status %>
+              <%= select_tag "note#{@zan_data_id.to_s}", options_for_select(["","申請中", "承認", "否認"], :selected => "#{@zan_data_status}") %>
+            </td>
+            <!-- 変更 -->
+            <td><%= check_box_tag :"zangyo_shiji_kakunin#{@zan_data_id.to_s}" %></td>
+            <!-- 勤怠を確認する -->
+            <td><%= link_to "確認", "#{target_person_id_tmp.to_s}/#{zangyo_data.zangyo_aprvl_req_on.beginning_of_month}/kintai_kakunin" , class: "btn btn-primary" %></td>
+          </tr>
+        <% end %>
+        
+        <% if target_person_id_tmp != -1 %>
           </table>
         <% end %>
+        
         <div><%= fapr.submit "変更を送信する", class: "btn btn-primary btn-soushin" %><%#= link_to "変更を送信する", soushin_kintai_path(@user), class: "btn btn-primary btn-soushin" %></div>
         
       <% end %>

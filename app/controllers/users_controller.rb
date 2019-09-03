@@ -7,11 +7,13 @@ class UsersController < ApplicationController
   before_action :correct_or_superior_user, only: [:show, :update]
   protect_from_forgery except: :soushin_kintai # soushin_kintaiアクションを除外
   
+  # ### ユーザー一覧表示 #####
   def index
       #logger.debug "ここを通ったよ(001)"
       @users = User.paginate(page: params[:page]).search(params[:search])
   end
 
+  # ### 勤怠表示 #####
   def show
     logger.debug "ここを通ったよ(002)"
     @user = User.find(params[:id])
@@ -50,7 +52,7 @@ class UsersController < ApplicationController
     #logger.debug "ここを通ったよ(002-3)"
     
     # 残業申請通知件数のカウント
-    @zangyo_aprvl_cnt = Zangyoaprvl.where('user_id = ?', params[:id]).where(zangyo_aprvl_status: '申請中').count
+    @zangyo_aprvl_cnt = Zangyoaprvl.where('user_id = ?', params[:id]).where(zangyo_aprvl_status: '申請中').where.not(zangyo_finished_at: nil).count
   end
 
   def new
@@ -67,7 +69,7 @@ class UsersController < ApplicationController
       render 'new'
     end
   end
-
+  
   def edit
   end
 
@@ -82,6 +84,7 @@ class UsersController < ApplicationController
   end
   
   def destroy
+    logger.debug "ここを通ったよ(022)"
     User.find(params[:id]).destroy
     flash[:success] = "削除しました。"
     redirect_to users_url
@@ -104,7 +107,7 @@ class UsersController < ApplicationController
     redirect_to @user   
   end
   
-  ### 勤怠申請関係 ### ----------------------------------------------------------------
+  # ### 1．勤怠申請関係 #####---------------------------------------------------------------------------------
   def kintai_shinsei
     logger.debug "ここを通ったよ(003)"
     @user = User.find(params[:id])
@@ -163,33 +166,35 @@ class UsersController < ApplicationController
   def month_shinsei
     logger.debug "ここを通ったよ(008)"
     @user = User.find(params[:id])
-    @shinsei_id = params[:user][:name]
+    @shonin_id = params[:user][:name]
     @first_day = first_day(params[:first_day])
     
     @apr_check_exist = Approval.find_by(kintai_req_on: @first_day, target_person_id: @user.id)
     if @apr_check_exist
       flash[:danger] = "既に申請済みです。"
-    elsif @shinsei_id == ""
+    elsif @shonin_id == ""
       flash[:info] = "申請者を選択してください。"
     else
-      @apr = Approval.new(user_id: @shinsei_id, kintai_req_on: @first_day, approval_status: "申請中", target_person_id: @user.id)
+      @apr = Approval.new(user_id: @shonin_id, kintai_req_on: @first_day, approval_status: "申請中", target_person_id: @user.id)
       @apr.save
       flash[:success] = "申請を送信しました。" # + @num.to_s
     end
     redirect_to user_path(params: {id: @user.id, first_day: @first_day})
   end
   
-   ### 残業申請関係 ### ----------------------------------------------------------------
+  # ### 2．残業申請(承認者側)関係 #####-------------------------------------------------------------------------
+  # 2-1.画面表示(残業申請承認モーダル画面)
   def zangyo_shinsei_approval
     logger.debug "ここを通ったよ(012)"
     @user = User.find(params[:id])
-    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
+    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where(yuko_flag: 1).order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
   end
   
+  # 2-2.残業申請承認(残業申請承認モーダル画面)
   def soushin_zangyo_shinsei
     logger.debug "ここを通ったよ(013)"
     @user = User.find(params[:id])
-    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
+    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where(yuko_flag: 1).order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
     
     @zangyo_apr.each do |zangyo_app_data|
       @app_tmp = zangyo_app_data.id
@@ -209,7 +214,49 @@ class UsersController < ApplicationController
     flash[:success] = "変更を送信しました。"
     redirect_to @user 
   end
+
+  #def import_file
+  #  registered_count = import_csv
+  #  flash[:success] = "#{registered_count}件登録しました"
+    #redirect_to 'index'
+    #redirect_to emails_path, notice: "#{registered_count}件登録しました"
+  #end
   
+  # def import_csv
+  #   # 登録処理前のレコード数
+  #   current_user_count = ::User.count
+  #   users = []
+    
+  #   logger.debug "ここを通ったよ(014-1)"
+  #   # windowsで作られたファイルに対応するので、encoding: "SJIS"を付けている
+  #   CSV.foreach(params[:csv_file].path, headers: true, encoding: "SJIS") do |row|
+  #     users << ::User.new({ name: row["name"], email: row["email"] })
+  #   end
+      
+  #   # importメソッドでバルクインサートできる
+  #   User.import(users)
+    
+  #   # 何レコード登録できたかを返す
+  #   registered_count = User.count - current_user_count
+    
+  #   logger.debug "ここを通ったよ(014-2)"
+  #   flash[:success] = "#{registered_count}件登録しました"
+  #   redirect_to users_url
+  # end
+  
+  def import
+    if params[:file].blank?
+      flash[:danger] = "CSVファイルを選択してください。"
+    else
+      # fileはtmpに自動で一時保存される
+      current_user_count = ::User.count
+      User.import(params[:file])
+      registered_count = User.count - current_user_count
+      flash[:success] = "ユーザーを#{registered_count}件登録しました。"
+    end
+    redirect_to users_url
+  end
+
 private
 
   def user_params
@@ -241,7 +288,7 @@ private
     end
     
     def superior_user
-      redirect_to(root_url) unless current_user.senior?
+      redirect_to(root_url) unless current_user.superior?
     end
     
     # 正しいユーザー、または、管理者ユーザーかどうか確認
@@ -253,6 +300,6 @@ private
     # 正しいユーザー、または、上長ユーザーかどうか確認
     def correct_or_superior_user
       @user = User.find(params[:id])
-      redirect_to(root_url) unless current_user?(@user) or current_user.senior?
+      redirect_to(root_url) unless current_user?(@user) or current_user.superior?
     end
 end

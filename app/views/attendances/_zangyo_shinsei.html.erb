@@ -1,3 +1,10 @@
+<!--
+###################################################
+# zns001_残業申請画面(一般・上長ユーザー、モーダル表示)
+#
+#
+###################################################
+-->
 <% provide(:title, "残業申請" ) %>
 
 <div class="modal-dialog modal-lg modal-dialog-center">
@@ -33,20 +40,36 @@
               'txtSunday'
             end
           %>
-          <%= fields_for "attendances[]", @attendance do |af| %>
+          <%= fields_for "zangyoaprvls[]", @zangyoaprvl do |af| %>
             <tr>
               <td><%= @slct_day.strftime("%m/%d") %><%#= day.worked_on.to_s(:date) %></td>
-              <td class="<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[@slct_day.wday] %></td>
-              <td><%= af.time_field :finished_plan_at, class: "form-control" %></td>
+              <td class = "<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[@slct_day.wday] %></td>
+              <td><%= af.time_field :zangyo_finished_at, class: "form-control" %></td>
               <td><%= check_box_tag :"yokujitsu_kakunin" %></td>
-              <td><%= af.text_field :gyomu_memo, class: "form-control" %></td>
+              <td><%= af.text_field :zangyo_note, class: "form-control" %><!-- <input type = "text" name = "zangyo_note" class = "select-zangyo-shonin2">--></td>
               <td>
                 <div class = 'select-zangyo-shonin'>
-                  <%= f.select :name, User.where(senior: true).map{|o| [o.name, o.id]}, {:include_blank => true}, {class: "select-zangyo-shonin2"} %>
+                  <%= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => @shonin_id_show}, {class: "select-zangyo-shonin2"} %>
                 </div>
               </td>
             </tr>
           <% end %>
+          <!-- 
+          <%#= fields_for "attendances[]", @attendance do |af| %>
+            <tr>
+              <td><%#= @slct_day.strftime("%m/%d") %><%#= day.worked_on.to_s(:date) %></td>
+              <td class = "<%#= css_class %>"><%#= %w{日 月 火 水 木 金 土}[@slct_day.wday] %></td>
+              <td><%#= af.time_field :finished_plan_at, class: "form-control" %></td>
+              <td><%#= check_box_tag :"yokujitsu_kakunin" %></td>
+              <td><%#= af.text_field :gyomu_memo, class: "form-control" %><!-- <input type = "text" name = "zangyo_note" class = "select-zangyo-shonin2"></td>
+              <td>
+                <div class = 'select-zangyo-shonin'>
+                  <%#= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, {:include_blank => true}, {class: "select-zangyo-shonin2"} %>
+                </div>
+              </td>
+            </tr>
+          <%# end %>
+          -->
         <%# end %>
       </tbody>
     </table>

@@ -1,0 +1,39 @@
+<!--
+###################################################
+# skn001_出勤中社員一覧画面
+#
+#
+###################################################
+-->
+
+<% provide(:title, '出勤中社員一覧') %>
+
+<h1>出勤中社員一覧</h1>
+  
+<div>
+  <table class = "table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>社員番号</th>
+        <th>名前</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if @shukkin_users.present? %>
+        <% @shukkin_users.each do |user_data| %>
+        <tr>
+          <td>
+            <%= user_data.employer_number %>
+          </td>
+          <td>
+            <%= user_data.name %>
+          </td>
+        </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+    <tfoot>
+
+    </tfoot>
+  </table>
+</div>
