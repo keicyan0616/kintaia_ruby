@@ -46,7 +46,7 @@
       <% end %>
       <%= link_to "【所属長承認申請のお知らせ】#{message_set}", shinsei_kintai_path(@user), remote: true, class: "shozoku-info", :style=>"color:#{color_set}" %>
     </div>
-    <div><%= link_to "【勤怠変更申請のお知らせ】", "#", class: "kintai-info" %></div>
+    <div><%= link_to "【勤怠変更申請のお知らせ】", henko_shinsei_approval_path(@user), remote: true, class: "kintai-info" %></div>
     <div>
       <% if @zangyo_aprvl_cnt >= 1 %>
         <% zangyo_message_set = " #{@zangyo_aprvl_cnt}件の通知があります" %>
@@ -61,11 +61,11 @@
   
   <!-- 各種機能ボタン関係 -->
   <div class = "btn-csv">
-    <%= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
+    <%= link_to "勤怠を編集", edit_editaprvls_path(@user, @first_day), class: "btn btn-primary" %>
     <%= link_to "CSV出力", export_csv_path(@user, @first_day, format: :csv), class: "btn btn-primary" %>
   </div>
   <div class = "btn-log">
-    <%= link_to "勤怠修正ログ(承認済み)", "#", class: "btn btn-primary" %>
+    <%= link_to "勤怠修正ログ(承認済み)", editaprvls_log_path(@user), class: "btn btn-primary" %>
   </div>
 
   <!-- 勤怠明細部 -->
@@ -245,3 +245,4 @@
 <div id="kintai-shinsei" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
 <div id="zangyo-shinsei" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
 <div id="zangyo-shinsei-approval" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="editaprvl-shinsei" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>

@@ -1,0 +1,36 @@
+<!--
+###################################################
+# klg002_勤怠ログ 実表部分(パーシャル)
+#
+#
+###################################################
+-->
+<table class = "table-bordered table-condensed"> 
+  <thead>
+    <tr>
+      <th>日付</th>
+      <th>変更前出社時間</th>
+      <th>変更前退社時間</th>
+      <th>変更後出社時間</th>
+      <th>変更後退社時間</th>
+      <th>指示者</th>
+      <th>承認日</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @log_data.each do |kyoten| %>
+
+    <tr>
+      <td><%= kyoten.change_kintai_req_on %></td>
+      <td><%= @year_value %></td>
+      <td><%= kyoten.change_started_at %></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    
+    <% end %>
+  </tbody>
+  </table>

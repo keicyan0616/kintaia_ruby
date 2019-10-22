@@ -1,0 +1,142 @@
+<!--
+###################################################
+# eas001_勤怠変更申請承認画面(上長ユーザーのみ、モーダル表示)
+#
+#
+###################################################
+-->
+
+<% provide(:title, '勤怠変更申請承認') %>
+
+<div class="modal-dialog modal-lg modal-dialog-center">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      
+      <div>
+      <%= form_for(@user, url: soushin_henko_shinsei_path, method: :patch) do |fapr| %>
+      
+        <% target_person_id_tmp = -1 %>
+        <% @editaprvls.each do |editaprvl_data| %>
+
+          <%# if target_person_id_tmp != editaprvl_data.change_target_person_id %>
+          <% if target_person_id_tmp != editaprvl_data.user_id %>
+            <% if target_person_id_tmp != -1 %>
+              </table>
+            <% end %>
+
+            <%# @target_user = User.find_by(id: editaprvl_data.change_target_person_id) %>
+            <% @target_user = User.find_by(id: editaprvl_data.user_id) %>
+            <div class = "person_title">【<%= @target_user.name %>からの勤怠変更申請】</div>
+            
+            <!-- 勤怠画面 ヘッダー部 -->
+            <table class = "table-bordered table-striped table-condensed">
+              <tr>
+                <td rowspan = "3">日付</td>
+                <td rowspan = "3">曜日</td>
+                <td colspan = "4">変更前</td>
+                <td colspan = "4">変更後</td>
+                <td rowspan = "3">備考</td>
+                <td rowspan = "3">指示者確認㊞</td>
+                <td rowspan = "3">変更</td>
+                <td rowspan = "3">勤怠を確認する</td>
+              </tr>
+              <tr>
+                <td colspan = "2">出社</td>
+                <td colspan = "2">退社</td>
+                <td colspan = "2">出社</td>
+                <td colspan = "2">退社</td>
+              </tr>
+              <tr>
+                <td>時</td>
+                <td>分</td>
+                <td>時</td>
+                <td>分</td>
+                <td>時</td>
+                <td>分</td>
+                <td>時</td>
+                <td>分</td>
+              </tr>
+          <% end %>
+
+        <%# target_person_id_tmp = editaprvl_data.change_target_person_id %>
+        <% target_person_id_tmp = editaprvl_data.user_id %>
+          <% 
+            css_class = 
+            case %w{日 月 火 水 木 金 土}[editaprvl_data.change_kintai_req_on.wday]
+            when '土'
+              'txtSaturday'
+            when '日'
+              'txtSunday'
+            end
+          %>
+          <!-- 上長IDで探したときに見つかったchange_target_person_id（申請対象者ID）の勤怠変更申請を表示する -->
+          <tr>
+            <!-- 日付 -->
+            <td><%= editaprvl_data.change_kintai_req_on.to_s(:date) %></td>
+            <!-- 曜日 -->
+            <td class="<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[editaprvl_data.change_kintai_req_on.wday] %></td>
+            
+            <!-- 変更前 出社(時) -->
+            <td>
+              <%# @attendance = Attendance.find_by(user_id: editaprvl_data.change_target_person_id, worked_on: editaprvl_data.change_kintai_req_on) %> <!--editaprvl_data.change_kintai_req_on) %>-->
+              <% @attendance = Attendance.find_by(user_id: editaprvl_data.user_id, worked_on: editaprvl_data.change_kintai_req_on) %> <!--editaprvl_data.change_kintai_req_on) %>-->
+              <%= @attendance.started_at.strftime("%H") if @attendance.started_at.present? %> <!--.strftime("%H") %>-->
+            </td>
+            <!-- 変更前 出社(分) -->
+            <%# @calc_work_datetime = Time.parse(editaprvl_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900") %>
+            <td>
+              <%= @attendance.started_at.strftime("%M") if @attendance.started_at.present? %>
+            </td>
+            <%#= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
+              
+            <!-- 変更前 退社(時) -->
+            <td><%= @attendance.finished_at.strftime("%H") if @attendance.finished_at.present? %></td>
+            <!-- 変更前 退社(分)　 -->
+            <td>
+              <%= @attendance.finished_at.strftime("%M") if @attendance.finished_at.present? %>
+            </td>
+            
+            <!-- 変更後 出社(時)　 -->
+            <%# @editaprvl = Editaprvl.find_by(change_target_person_id: editaprvl_data.change_target_person_id, change_kintai_req_on: "2019-09-09") %>
+            <td><%= editaprvl_data.change_started_at.strftime("%H") if editaprvl_data.change_started_at.present? %></td>
+            <!-- 変更後 出社(分) -->
+            <td><%= editaprvl_data.change_started_at.strftime("%M") if editaprvl_data.change_started_at.present? %>
+            </td>
+            
+            <!-- 変更後 退社(時) -->
+            <td><%= editaprvl_data.change_finished_at.strftime("%H") if editaprvl_data.change_finished_at.present? %></td>
+            <!-- 変更後 退社(分) -->
+            <td><%= editaprvl_data.change_finished_at.strftime("%M") if editaprvl_data.change_finished_at.present? %></td>
+            
+            <!-- 備考 -->
+            <td><%= editaprvl_data.note if editaprvl_data.note.present? %></td>
+            
+            <!-- 指示者確認㊞ -->
+            <td>
+              <% @edit_data_id = editaprvl_data.id %>
+              <% @edit_data_status = editaprvl_data.change_aprvl_status %>
+              <%= select_tag "note#{@edit_data_id.to_s}", options_for_select(["","申請中", "承認", "否認"], :selected => "#{@edit_data_status}") %>
+            </td>
+            
+            <!-- 変更 -->
+            <td><%= check_box_tag :"edit_shiji_kakunin#{@edit_data_id.to_s}" %></td>
+            
+            <!-- 勤怠を確認する -->
+            <td><%= link_to "確認", "#{target_person_id_tmp.to_s}/#{editaprvl_data.change_kintai_req_on.beginning_of_month}/kintai_kakunin" , class: "btn btn-primary" %></td>
+          </tr>
+        <% end %>
+        
+        <% if target_person_id_tmp != -1 %>
+          </table>
+        <% end %>
+        
+        <div><%= fapr.submit "変更を送信する", class: "btn btn-primary btn-soushin" %></div>
+        
+      <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190831050342) do
+ActiveRecord::Schema.define(version: 20191006165200) do
 
   create_table "approvals", force: :cascade do |t|
     t.integer "user_id"
@@ -39,6 +39,21 @@ ActiveRecord::Schema.define(version: 20190831050342) do
     t.string "kyoten_shurui"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "editaprvls", force: :cascade do |t|
+    t.integer "user_id"
+    t.date "change_kintai_req_on"
+    t.datetime "change_started_at"
+    t.datetime "change_finished_at"
+    t.string "note"
+    t.string "change_aprvl_status"
+    t.integer "change_target_person_id"
+    t.datetime "approval_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "change_first_started_at"
+    t.index ["user_id"], name: "index_editaprvls_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|

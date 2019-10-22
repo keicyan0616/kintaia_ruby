@@ -17,6 +17,7 @@ gem 'jbuilder',     '2.7.0'
 gem 'rails-i18n'
 gem 'activerecord-import'
 gem 'roo'
+gem 'jquery-turbolinks'
 
 group :development, :test do
   gem 'sqlite3', '1.3.13'

@@ -1,0 +1,21 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  change_kintai_req_on: 2019-09-08
+  change_started_at: 2019-09-08 17:37:26
+  change_finished_at: 2019-09-08 17:37:26
+  note: MyString
+  change_aprvl_status: MyString
+  change_target_person_id: 1
+  approval_at: 2019-09-08 17:37:26
+
+two:
+  user: two
+  change_kintai_req_on: 2019-09-08
+  change_started_at: 2019-09-08 17:37:26
+  change_finished_at: 2019-09-08 17:37:26
+  note: MyString
+  change_aprvl_status: MyString
+  change_target_person_id: 1
+  approval_at: 2019-09-08 17:37:26

@@ -220,6 +220,23 @@ input, textarea, select, .uneditable-input {
   padding: 13px;
 }
 
+/* ### 勤怠変更画面 ### */
+.btn-editaprvls-update {
+  padding: 15px;
+  width: 50%;
+  margin: 0 0 0 33%;
+}
+
+.btn-editaprvl-save{
+  margin: 0px 0px 0px 20px;
+  width: 180px;
+  /* float: right; */
+}
+.btn-editaprvl-cancel{
+  width: 180px;
+  float: left;
+}
+
 /* ### 勤怠承認画面 ### */
 /*
 .list-shinsei{

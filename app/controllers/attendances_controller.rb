@@ -18,28 +18,28 @@ class AttendancesController < ApplicationController
   
   # ### 1．勤怠編集関係 ######
   # --- 勤怠編集画面 表示 -----
-  def edit
-    @user = User.find(params[:id])
-    @first_day = first_day(params[:date])
-    @last_day = @first_day.end_of_month
-    @dates = user_attendances_month_date
-  end
+  # def edit
+  #   @user = User.find(params[:id])
+  #   @first_day = first_day(params[:date])
+  #   @last_day = @first_day.end_of_month
+  #   @dates = user_attendances_month_date
+  # end
   
   # 勤怠編集画面 更新送信
-  def update
-    @user = User.find(params[:id])
-    if attendances_invalid?
-      attendances_params.each do |id, item|
-        attendance = Attendance.find(id)
-        attendance.update_attributes(item)
-      end
-      flash[:success] = '勤怠情報を更新しました。'
-      redirect_to user_path(@user, params:{first_day: params[:date]})
-    else
-      flash[:danger] = "不正な時間入力がありました、再入力してください。"
-      redirect_to edit_attendances_path(@user, params[:date])
-    end
-  end
+  # def update
+  #   @user = User.find(params[:id])
+  #   if attendances_invalid?
+  #     attendances_params.each do |id, item|
+  #       attendance = Attendance.find(id)
+  #       attendance.update_attributes(item)
+  #     end
+  #     flash[:success] = '勤怠情報を更新しました。'
+  #     redirect_to user_path(@user, params:{first_day: params[:date]})
+  #   else
+  #     flash[:danger] = "不正な時間入力がありました、再入力してください。"
+  #     redirect_to edit_attendances_path(@user, params[:date])
+  #   end
+  # end
   
   # ### 2．残業申請(申請者側)関係 ######
   # 2-1．モーダル表示（残業申請モーダル画面）
