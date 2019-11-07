@@ -20,15 +20,33 @@
 
     <tbody>
       <%= form_tag editaprvls_part_log_path, method: :get, remote: true do %>
-        <%= select_tag('year_search', options_for_select([['2019','1'], ['2020','2'], ['2021','3'], ['2022','4']]), {:onChange => "changeMajor()" }) %>
+        <div>      
+          <button type="reset" value="リセット", class="btn btn-primary btn-reset-log", id="reset">リセット</button>
+        </div>
+        
+        <% @year_no = Date.today.strftime("%y") %>
+        <div>
+          年：
+          <%= select_tag('year_search', options_for_select([['2018','1'], ['2019','2'], ['2020','3'], ['2021','4'], ['2022','5']], \
+              :selected => "#{@year_no.to_i - 17}"), {:onChange => "changeMajor()", class: 'select-year'}) %>
+        </div>
         <%#= select_tag('year_search', options_for_select([['2019','1'], ['2020','2'], ['2021','3'], ['2022','4']]), {:onChange => "javascript: this.form.changeMajor()" }) %>
-        <%= select_tag('month_search', options_for_select([['01','1'], ['02','2'], ['03','3'], ['04','4'], ['05','5'], ['06','6'], ['07','7'], ['08','8'], ['09','9'], ['10','10'], ['11','11'], ['12','12']]), {:onChange => "changeMajor()" }) %>
+        
+        <% @month_no = Date.today.strftime("%m") %>
+        <div>
+          月：
+          <%= select_tag('month_search', options_for_select([['01','1'], ['02','2'], ['03','3'], ['04','4'], ['05','5'], ['06','6'], \
+              ['07','7'], ['08','8'], ['09','9'], ['10','10'], ['11','11'], ['12','12']] ,:selected => "#{@month_no}"), {:onChange => "changeMajor()", class: 'select-month' }) %>
+        </div>  
         <%#= select_tag :color, options_for_select(["Red", "Green", "Blue"], selected_color), class: "select-drop" %>
       <% end %>
     </tbody>
-    
+
     <div id="classList" style="display: inline;">
-      <%#= render :partial => 'kintai_part_log' %>
+      <%# if @show_flag == true %>
+        <%#= render :partial => 'kintai_part_log' %>
+        <%#= render :partial => 'kintai_part_log', :locals => { :show_flag => @show_flag } %>
+      <%# end %>
       <%#= render :partial => 'classList_body' %>
     </div>  
   
@@ -38,20 +56,50 @@
 </div>
 
 <script>
+  //onChangeイベント発生時
   function changeMajor(){
     //alert('アラートのメッセージ');
-    var select = document.getElementById('year_search');
-    var options =  document.getElementById('month_search').options;
-    var value = options.item(select.selectedIndex).value;
+    var year_select = document.getElementById('year_search');
+    var year_options = document.getElementById('year_search').options;
+    var month_select = document.getElementById('month_search');
+    var month_options = document.getElementById('month_search').options;
+    var year_value = year_options.item(year_select.selectedIndex).value;
+    var month_value = month_options.item(month_select.selectedIndex).value;
     //var universityID = <%#= @student.universities.first.id %>;
     //alert(value);
  
     $.ajax({
       url: "/editaprvls/kintai_part_class",
       type: "POST",
-      data: 'id=<%= @user.id %>&year_value=' + value
+      data: 'id=<%= @id %>&year_value=' + year_value + '&month_value=' + month_value
     })
-  }
+  };
+  
+  //リセットボタン押下時
+  document.getElementById("reset").onclick = function() {
+    document.getElementById("year_search").selectedIndex = <%= @year_no.to_i - 18 %>;
+    document.getElementById("month_search").selectedIndex = <%= @month_no.to_i - 1 %>;
+    changeMajor();
+    //alert(<%#= @year_no %>);
+  };
+
+  //勤怠ログページ表示時
+  document.addEventListener('turbolinks:load', function() {
+    changeMajor();
+  });
+  
+//  window.addEventListener('load', function(){
+//    console.log('これとか')
+//})
+  
+//  window.onload = function() {
+//   alert('ページの読み込みが完了したよ！');
+//}
+
+//$(document).on 'turbolinks:load', ->
+//  alert('ページの読み込みが完了したよ！');
+
+//window.onload = changeMajor;
 </script>
 
   <!--<tbody>-->

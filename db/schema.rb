@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191006165200) do
+ActiveRecord::Schema.define(version: 20191106161615) do
 
   create_table "approvals", force: :cascade do |t|
     t.integer "user_id"
@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(version: 20191006165200) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "change_first_started_at"
+    t.datetime "change_first_finished_at"
     t.index ["user_id"], name: "index_editaprvls_on_user_id"
   end
 

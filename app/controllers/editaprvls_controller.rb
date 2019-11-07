@@ -43,18 +43,21 @@ class EditaprvlsController < ApplicationController
      #if editaprvls_invalid?
        logger.debug "ここを通ったよ(027)"
        editaprvls_params.each do |id, item|
-           
-#翌日フラグを見ながら書き込み
+
+#指示確認㊞欄に入力があれば書き込み ← できてる？
+         editaprvl = Editaprvl.find(id)
+         editaprvl.update_attributes(item)
+         
+#翌日フラグを見ながら書き込み ← 各日での翌日フラグを取得して、翌日日時取得後、退社日時を上書き
+         @edit_started_time = params[:editaprvls][id][:change_started_at]     #変更出勤時間
+         @edit_finished_time = params[:editaprvls][id][:change_finished_at]   #変更退社時間
 #           @finished_plan_at = Time.parse(@slct_date + " " + @finished_plan_time.strftime("%H:%M") + " +0900")
 #           #残業時間申請日時の翌日設定
 #           if @yokujitsu_kakunin_check == "1" then
 #             #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
 #             @finished_plan_at = @finished_plan_at.tomorrow
-#           end
-
-#指示確認㊞欄に入力があれば書き込み
-         editaprvl = Editaprvl.find(id)
-         editaprvl.update_attributes(item)
+#           end         
+         
          #editaprvl.user_id = params[:"shonin#{id}"]
          #@id = id
          @shonin_id = params[:"shonin#{id}"]
@@ -63,6 +66,10 @@ class EditaprvlsController < ApplicationController
          if @shonin_id != ""
            editaprvl.change_aprvl_status = "申請中"
          end
+         # !!!お試し!!!
+         editaprvl.change_first_started_at = @edit_started_time
+         editaprvl.change_first_finished_at = @edit_finished_time
+         # !!!お試し!!!
          editaprvl.save
        end
        flash[:success] = "勤怠情報を更新しました。" #{@shonin_id}"
@@ -86,7 +93,8 @@ class EditaprvlsController < ApplicationController
   def soushin_henko_shinsei
     logger.debug "ここを通ったよ(026)"
     @user = User.find(params[:id])
-    @editaprvls = Editaprvl.where(change_target_person_id: params[:id]).where.not(change_aprvl_status: "承認").where.not(change_aprvl_status: nil).order(user_id: :asc).order(change_kintai_req_on: :asc)
+    @editaprvls = Editaprvl.where(change_target_person_id: params[:id]).where.not(change_aprvl_status: "承認").where.not(change_aprvl_status: nil).order(user_id: :asc)\
+                  .order(change_kintai_req_on: :asc)
     
     @editaprvls.each do |edit_app_data|
       @app_tmp = edit_app_data.id
@@ -95,6 +103,9 @@ class EditaprvlsController < ApplicationController
         if params[:"note#{@app_tmp.to_s}"] == ""
           edit_app_data.delete
         else
+          
+          ### ここで変更前の出勤、退勤時間が入ってなかったらAttendanceテーブルから取得して、Editaprvlテーブルに書き込む ###
+          
           edit_app_data.change_aprvl_status = params[:"note#{@app_tmp.to_s}"]
           edit_app_data.save
         end
@@ -106,15 +117,21 @@ class EditaprvlsController < ApplicationController
     flash[:success] = "変更を送信しました。"
     redirect_to @user 
   end
-   
+
+  # ### 3．勤怠ログ関係 #####-------------------------------------------------------------------------   
+  # 3-1.画面表示(勤怠ログ画面)
   def kintai_log
     logger.debug "ここを通ったよ(027)"
+    #@year_value = "999"
     @user = User.find(params[:id])
-    #@log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "2019-09-01".."2019-09-30")
-    @year_value = "999"
+    @id = params[:id]
+    @year_value = params[:year_search]
+    #@log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "#{Date.today.strftime("%Y-%m")}-01".."#{Date.today.strftime("%Y-%m")}-30")
+    @log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "#{Date.today.strftime("%Y-%m")}-01".."#{Date.today.end_of_month}").order(change_kintai_req_on: :asc)
+    #@show_flag = true
   end
   
-  def kintai_part_log
+  def kintai_part_log #←いらいないかも(Viewがあるから必要かも？)？
     logger.debug "ここを通ったよ(028)"
     #@user = User.find(params[:id])
     #@log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "2019-10-01".."2019-10-31")
@@ -125,9 +142,25 @@ class EditaprvlsController < ApplicationController
     logger.debug "ここを通ったよ(029)"
     #@year_value = "333"
     @year_value = params[:year_value]
-    @log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "2019-09-01".."2019-09-30")
+    @month_value = params[:month_value]
+    
+    @year = 2017 + @year_value.to_i
+    
+    #@log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "2019-09-01".."2019-09-30")
+    @log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: \
+                  "#{Date.strptime("#{@year}-#{@month_value}-01").beginning_of_month}".."#{Date.strptime("#{@year}-#{@month_value}-01").end_of_month}")\
+                  .where(change_aprvl_status: "承認").order(change_kintai_req_on: :asc)
+    
+    #@log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "#{Date.today.strftime("%Y-%m")}-01".."#{Date.today.end_of_month.strftime("%Y-%m-%d")}")
+    #@show_flag = false
   end
 
+private
+  def editaprvls_params
+    params.permit(editaprvls: [:change_kintai_req_on, :change_started_at, :change_finished_at, :note, :user_id])[:editaprvls]
+  end
+  
+end
   # def call_ajax
   #   # 選択肢のデータを取得
   #   item_list = {
@@ -288,10 +321,6 @@ class EditaprvlsController < ApplicationController
 #     end
 #   end
 
-private
-  def editaprvls_params
-    params.permit(editaprvls: [:change_kintai_req_on, :change_started_at, :change_finished_at, :note, :user_id])[:editaprvls]
-  end
 #     def attendances_zangyo_params
 #       #params.permit(attendances: [:finished_plan_at, :gyomu_memo])[:attendances]
 #       params.permit(attendances: [:finished_at])[:attendances]
@@ -306,4 +335,3 @@ private
 #       @user = User.find(params[:id])
 #       redirect_to(root_url) unless current_user?(@user) or current_user.admin?
 #     end
-end

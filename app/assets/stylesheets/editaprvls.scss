@@ -1,3 +1,11 @@
 // Place all the styles related to the editaprvls controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+.select-year, .select-month {
+  width: 80px;
+}
+
+.btn-reset-log {
+  margin: 0 0 10px 0;
+}
