@@ -1,0 +1,47 @@
+<!--
+###################################################
+# ktn002_拠点情報更新画面
+#
+#
+###################################################
+-->
+
+<% provide(:title, '拠点情報更新') %>
+
+<div class="modal-dialog modal-lg modal-dialog-center">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      
+  <%# @kyoten.each do |kyoten| %>       
+    <div><!-- id= "link<%#= kyoten.id %>" class="collapse">-->
+      <% @kyoten_new = Baseplace.find_by(kyoten_id: params[:id]) %>
+      <%= form_for(@kyoten_new, url: update_baseplace_path(params[:id])) do |f| %>
+        <h2>
+        <%= f.label :【拠点番号： %>
+        <%= params[:id] %>
+        <%= f.label :】 %>
+        </h2>
+        <br>
+        
+        <%= f.label :拠点番号 %>
+        <%= f.text_field :kyoten_id, class: 'form-control' %>
+        
+        <%= f.label :拠点名 %>
+        <%= f.text_field :kyoten_name, class: 'form-control' %>
+
+        <%= f.label :勤怠種類 %>
+        <%= f.text_field :kyoten_shurui, class: 'form-control' %>
+        <br>
+        <%= f.submit "修正する", class: "btn btn-primary btn-do-edit" %>
+      <% end %> 
+    </div>
+    <br>
+  <%# end %>
+
+    </div>
+  </div>
+</div>
+

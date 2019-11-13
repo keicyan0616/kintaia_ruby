@@ -26,18 +26,19 @@
       <% @kyoten.each do |kyoten| %>  
         <tr>
           <td>
-            <!-- <div class="panel-heading"> -->
-              <!-- <div class="panel panel-default collaps"> -->
-                <a href="#link<%= kyoten.id %>" data-toggle="collapse" class="btn btn-primary ">修正</a>
-              <!-- </div> -->
-            <!-- </div> -->
+            <!--<div class="panel-heading">
+              <div class="panel panel-default collaps">-->
+                <!-- <a href="#link<%#= kyoten.id %>" data-toggle="collapse" class="btn btn-primary ">修正</a> -->
+                <%= link_to "修正", kyoten_edit_path(kyoten.kyoten_id), remote: true, class: "btn btn-primary" %>
+              <!--</div>
+            </div>-->
           </td>
           <td>
             <div class = "btn-delete">
-              <%= link_to "削除", kyoten, method: :delete, data: { confirm: "削除してよろしいですか?"}, class: "btn btn-primary" %>
+              <%= link_to "削除", kyoten, method: :delete, data: {confirm: "削除してよろしいですか?"}, class: "btn btn-primary" %>
             </div>
           </td>
-          <td><%= kyoten.id %></td>
+          <td><%= kyoten.kyoten_id %></td>
           <td><%= kyoten.kyoten_name %></td>
           <td><%= kyoten.kyoten_shurui %></td>
         </tr>
@@ -46,43 +47,36 @@
   </table>
   <br>  
 
-  <% @kyoten.each do |kyoten| %>       
-    <div id= "link<%= kyoten.id %>" class="collapse">
-      <% @kyoten_new = Baseplace.find(kyoten.id) %>
-      <%= form_for(@kyoten_new, url: update_baseplace_path(kyoten.id)) do |f| %>
-        <%#= render 'shared/error_messages', object: @user %>
-        
-        <%= f.label :【拠点番号： %>
-        <%= kyoten.id %>
-        <%= f.label :】 %>
-        <br>
-        <!-- <br> -->
-        
-        <%#= f.label :拠点番号 %>
-        <%#= f.text_field :id, class: 'form-control' %>
-        
-        <%= f.label :拠点名 %>
-        <%= f.text_field :kyoten_name, class: 'form-control' %>
-
-        <%= f.label :勤怠種類 %>
-        <%= f.text_field :kyoten_shurui, class: 'form-control' %>
-        <br>
-        <%= f.submit "修正する", class: "btn btn-primary btn-do-edit" %>
-      <% end %> 
-    </div>
-    <br>
-  <% end %>
-
   <!-- 拠点情報追加ボタン処理 -->
   <div class="panel-heading">
     <div class="panel panel-default collaps">
-      <!-- <a href="#link2" data-toggle="collapse" class="btn btn-primary btn-edit2">拠点情報追加</a> -->
-      <%= link_to "拠点情報追加", kyoten_add_path, remote: true, class: "btn btn-primary btn-edit2" %>
+      <%#= link_to "拠点情報追加", kyoten_add_path, remote: true, class: "btn btn-primary btn-edit2" %>
+      <a href="#link" data-toggle="collapse" class="btn btn-primary btn-edit2">拠点情報追加</a>
+      
+        <div id= "link" class="collapse kyoten-acordion">
+          <%= form_for(@kyoten_new, url: touroku_baseplace_path, method: :patch) do |f| %>
+            <table class = "table-bordered table-striped table-condensed">
+              <tr>
+                <td>拠点番号</td>
+                <td>拠点名</td>
+                <td>勤怠種類</td>
+              </tr>
+    
+              <tr>
+                <th><%= f.text_field :kyoten_id, class: "form-control" %></th>
+                <td><%= f.text_field :kyoten_name, class: "form-control" %></td>
+                <td><%= f.text_field :kyoten_shurui, class: "form-control" %></td>
+              </tr>
+            </table>
+            
+            <div><%= f.submit "新規登録", class: "btn btn-primary btn-soushin" %></div>
+          <% end %>
+        </div>
     </div>
   </div>
 
 </div> 
 
 <!--モーダルウインドウ表示-->
-<div id="kyoten-add" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="kyoten-edit" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
 

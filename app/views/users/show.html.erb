@@ -172,10 +172,19 @@
           <!-- 在社時間(計算) -->
           <td>
             <% if day.started_at.present? && day.finished_at.present? %>
-              <%#= working_times(day.started_at, day.finished_at) %>
-              <%= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
+              <% @diff_sec = (Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min) - Time.parse(day.started_at.to_s(:hour) + ":" + start_min)).to_i %>
+              
+              <% if @diff_sec < 0 %>
+                <% @diff_sec = 86400 + @diff_sec %>
+                <%= format("%.2f", 24 + working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)).to_f) %>
+                <%#= @calc_working_time = 24.00 + @calc_working_time.to_i %>
+              <% else %>                
+                <%#= working_times(day.started_at, day.finished_at) %>
+                <%= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
+              <% end %>
+              
               <%# seconds = (day.finished_at - day.started_at).to_i %>
-              <% seconds = (Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min) - Time.parse(day.started_at.to_s(:hour) + ":" + start_min)).to_i %>
+              <% seconds = @diff_sec %>
               <% @total_seconds = @total_seconds.to_i + seconds %>
             <% end %>
           </td>

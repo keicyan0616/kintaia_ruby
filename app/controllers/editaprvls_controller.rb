@@ -39,36 +39,53 @@ class EditaprvlsController < ApplicationController
    
    # --- 勤怠編集画面 更新送信 -----
    def update
+    ### ここに入力チェックを入れたい ###
+
      @user = User.find(params[:id])
      #if editaprvls_invalid?
        logger.debug "ここを通ったよ(027)"
        editaprvls_params.each do |id, item|
 
-#指示確認㊞欄に入力があれば書き込み ← できてる？
          editaprvl = Editaprvl.find(id)
          editaprvl.update_attributes(item)
          
-#翌日フラグを見ながら書き込み ← 各日での翌日フラグを取得して、翌日日時取得後、退社日時を上書き
-         @edit_started_time = params[:editaprvls][id][:change_started_at]     #変更出勤時間
-         @edit_finished_time = params[:editaprvls][id][:change_finished_at]   #変更退社時間
-#           @finished_plan_at = Time.parse(@slct_date + " " + @finished_plan_time.strftime("%H:%M") + " +0900")
-#           #残業時間申請日時の翌日設定
-#           if @yokujitsu_kakunin_check == "1" then
+         @yokujitsu_kakunin_check = ""
+         @edit_started_time = ""
+         @edit_finished_time = ""
+
+         @yokujitsu_kakunin_check = params[:"yokujitsu_kakunin#{id}"]         #翌日(チェック)
+         #@edit_started_time = params[:editaprvls][id][:change_started_at]    #変更出勤時間
+         #@edit_finished_time = params[:editaprvls][id][:change_finished_at]  #変更退社時間
+         if params[:editaprvls][id][:change_started_at] != "" then
+           @edit_started_time = Time.parse(editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") + " " + editaprvl.change_started_at.strftime("%H:%M") + " +0900")     #変更出勤時間
+         end
+         if params[:editaprvls][id][:change_finished_at] != "" then
+           @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") + " " + editaprvl.change_finished_at.strftime("%H:%M") + " +0900")   #変更退社時間
+         end
+         
+#        @finished_plan_at = Time.parse(@slct_date + " " + @finished_plan_time.strftime("%H:%M") + " +0900")
+         #退社時間変更申請日時の翌日設定
+         #翌日フラグを見ながら書き込み ← 各日での翌日フラグを取得して、翌日日時取得後、退社日時を上書き
+         if @yokujitsu_kakunin_check == "1" then
 #             #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
 #             @finished_plan_at = @finished_plan_at.tomorrow
-#           end         
+           @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.tomorrow.strftime("%Y-%m-%d") + " " + editaprvl.change_finished_at.strftime("%H:%M") + " +0900")
+         end         
          
          #editaprvl.user_id = params[:"shonin#{id}"]
          #@id = id
+         #指示確認㊞欄に入力があれば書き込み ← できてる？
          @shonin_id = params[:"shonin#{id}"]
          editaprvl.user_id = params[:id]
          editaprvl.change_target_person_id = @shonin_id
          if @shonin_id != ""
            editaprvl.change_aprvl_status = "申請中"
          end
+         editaprvl.change_started_at = @edit_started_time
+         editaprvl.change_finished_at = @edit_finished_time
          # !!!お試し!!!
-         editaprvl.change_first_started_at = @edit_started_time
-         editaprvl.change_first_finished_at = @edit_finished_time
+         #editaprvl.change_first_started_at = @edit_started_time
+         #editaprvl.change_first_finished_at = @edit_finished_time
          # !!!お試し!!!
          editaprvl.save
        end
@@ -103,9 +120,19 @@ class EditaprvlsController < ApplicationController
         if params[:"note#{@app_tmp.to_s}"] == ""
           edit_app_data.delete
         else
-          
-          ### ここで変更前の出勤、退勤時間が入ってなかったらAttendanceテーブルから取得して、Editaprvlテーブルに書き込む ###
-          
+          if params[:"note#{@app_tmp.to_s}"] == "承認"
+            @attend_data = ""
+            @attend_data = Attendance.find_by(user_id: edit_app_data.user_id, worked_on: edit_app_data.change_kintai_req_on)
+            ### ここで変更前の出勤、退勤時間が入ってなかったらAttendanceテーブルから取得して、Editaprvlテーブルに書き込む ###
+            if @attend_data.present?
+              edit_app_data.change_first_started_at = @attend_data.started_at if edit_app_data.change_first_started_at == nil and edit_app_data.change_started_at == nil
+              edit_app_data.change_first_finished_at = @attend_data.finished_at if edit_app_data.change_first_finished_at == nil and edit_app_data.change_finished_at == nil
+              @attend_data.started_at = edit_app_data.change_started_at
+              @attend_data.finished_at = edit_app_data.change_finished_at
+              @attend_data.save
+            end
+            edit_app_data.approval_at = Time.now
+          end
           edit_app_data.change_aprvl_status = params[:"note#{@app_tmp.to_s}"]
           edit_app_data.save
         end

@@ -39,7 +39,16 @@
               <% end %>
               <td><%= af.time_field :change_started_at, class: "form-control", readonly: readOnlyFlg %></td>
               <td><%= af.time_field :change_finished_at, class: "form-control", readonly: readOnlyFlg %></td>
-              <td><%= check_box_tag :"yokujitsu_kakunin" %></td>
+              <!--翌日退社時間が翌日だったら、チェックが自動で入れる -->
+              <td>
+                <% @yokujitsu_flag = 0 %>
+                <% if day.change_finished_at.present? and day.change_kintai_req_on != Date.parse(day.change_finished_at.strftime("%Y-%m-%d")) %>
+                  <% @yokujitsu_flag = 1 %>
+                  <%= check_box_tag :"yokujitsu_kakunin#{day.id}" ,@yokujitsu_flag ,{:checked => "checked"} %>
+                <% else %>
+                    <%= check_box_tag :"yokujitsu_kakunin#{day.id}" %>
+                <% end %>
+              </td>
               <td>
                 <% if day.change_started_at.present? && day.change_finished_at.present? %>
                   <%= working_times(day.change_started_at, day.change_finished_at) %>

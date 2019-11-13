@@ -38,7 +38,7 @@ Rails.application.routes.draw do
   
   #拠点一覧表示
   get '/baseplaces/kyoten_list', to: 'baseplaces#kyoten_list', as: :kyoten_list
-  get '/baseplaces/kyoten_add', to: 'baseplaces#kyoten_add', as: :kyoten_add
+  get '/baseplaces/:id/kyoten_edit', to: 'baseplaces#kyoten_edit', as: :kyoten_edit
   delete '/basesplaces/:id/delete', to: 'baseplaces#destroy', as: :baseplace
   patch '/basesplaces/:id/update', to: 'baseplaces#update', as: :update_baseplace
   patch '/basesplaces/touroku', to: 'baseplaces#touroku', as: :touroku_baseplace
