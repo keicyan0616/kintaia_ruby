@@ -12,7 +12,7 @@ class User < ApplicationRecord
                     uniqueness: { case_sensitive: false }
   has_secure_password
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
-  validates :department, length: { in: 3..50 }, allow_blank: true
+  validates :affiliation, length: { in: 3..50 }, allow_blank: true
   
   def self.search(search)
     return User.all unless search
@@ -66,6 +66,6 @@ class User < ApplicationRecord
 
   # 更新を許可するカラムを定義
   def self.updatable_attributes
-    ["id", "name", "email", "department", "employer_number", "uid", "basic_time", "work_time", "work_end_time", "superior", "admin", "password"]
+    ["id", "name", "email", "affiliation", "employer_number", "uid", "basic_work_time", "designated_work_start_time", "designated_work_end_time", "superior", "admin", "password"]
   end
 end

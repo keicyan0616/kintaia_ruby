@@ -51,8 +51,8 @@
     <%= f.label :email %>
     <%= f.email_field :email, class: 'form-control' %>
 
-    <%= f.label :department %>
-    <%= f.text_field :department, class: 'form-control' %>
+    <%= f.label :affiliation %>
+    <%= f.text_field :affiliation, class: 'form-control' %>
     
     <%= f.label :employer_number, "社員番号" %>
     <%= f.text_field :employer_number, class: 'form-control' %>
@@ -66,14 +66,14 @@
     <%#= f.label :password_confirmation %>
     <%#= f.password_field :password_confirmation, class: 'form-control' %>
 
-    <%= f.label :basic_time, "基本勤務時間" %>
-    <%= f.time_field :basic_time, class: 'form-control' %>
+    <%= f.label :basic_work_time, "基本勤務時間" %>
+    <%= f.time_field :basic_work_time, class: 'form-control' %>
     
-    <%= f.label :work_time, "指定勤務開始時間" %>
-    <%= f.time_field :work_time, class: 'form-control' %>
+    <%= f.label :designated_work_start_time, "指定勤務開始時間" %>
+    <%= f.time_field :designated_work_start_time, class: 'form-control' %>
 
-    <%= f.label :work_end_time, "指定勤務終了時間" %>
-    <%= f.time_field :work_end_time, class: 'form-control' %>
+    <%= f.label :designated_work_end_time, "指定勤務終了時間" %>
+    <%= f.time_field :designated_work_end_time, class: 'form-control' %>
     
     <br>
     <%= f.submit "編集する", class: "btn btn-primary btn-do-edit" %>

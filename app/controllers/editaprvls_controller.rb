@@ -16,86 +16,133 @@ class EditaprvlsController < ApplicationController
 #     redirect_to @user
 #   end
   
-   # ### 1．勤怠編集関係 ######
-   # --- 勤怠編集画面 表示 -----
-   def edit
-     logger.debug "ここを通ったよ(024)"
+  # ### 1．勤怠編集関係 ######
+  # --- 勤怠編集画面 表示 -----
+  def edit
+    logger.debug "ここを通ったよ(024)"
      
-     @user = User.find(params[:id])
-     @first_day = first_day(params[:date])
-     #@first_day = first_day(params[:first_day])
-     @last_day = @first_day.end_of_month
+    @user = User.find(params[:id])
+    @first_day = first_day(params[:date])
+    #@first_day = first_day(params[:first_day])
+    @last_day = @first_day.end_of_month
      
-     (@first_day..@last_day).each do |day|
-       unless @user.editaprvls.any? {|editaprvl| editaprvl.change_kintai_req_on == day}
-         record = @user.editaprvls.build(change_kintai_req_on: day)
-         #record.user_id = nil
-         #record.change_target_person_id = @user.id
-         record.save
-       end
-     end
-     @dates = user_editaprvls_month_date
-   end
+    (@first_day..@last_day).each do |day|
+      unless @user.editaprvls.any? {|editaprvl| editaprvl.change_kintai_req_on == day}
+        record = @user.editaprvls.build(change_kintai_req_on: day)
+        #record.user_id = nil
+        #record.change_target_person_id = @user.id
+        record.save
+      end
+    end
+    @dates = user_editaprvls_month_date
+  end
    
-   # --- 勤怠編集画面 更新送信 -----
-   def update
-    ### ここに入力チェックを入れたい ###
+  # --- 勤怠編集画面 更新送信 -----
+  def update
+    
+    @user = User.find(params[:id])
+    #if editaprvls_invalid?
+    logger.debug "ここを通ったよ(027)"
+    @error_hnt = "OK"
+    @edit_kintai_req_on = ""
+    
+    editaprvls_params.each do |id, item|
+      editaprvl = Editaprvl.find(id)
+      #editaprvl.update_attributes(item)
+       
+      @yokujitsu_kakunin_check = ""
+      @edit_started_time_4i = ""
+      @edit_started_time_5i = ""
+      @edit_started_time = ""
+      @edit_finished_time_4i = ""
+      @edit_finished_time_5i = ""
+      @edit_finished_time = ""
+      @note = ""
 
-     @user = User.find(params[:id])
-     #if editaprvls_invalid?
-       logger.debug "ここを通ったよ(027)"
-       editaprvls_params.each do |id, item|
+      @yokujitsu_kakunin_check = params[:"yokujitsu_kakunin#{id}"]                  #翌日(チェック)
+      @edit_started_time_4i = params[:editaprvls][id][:"change_started_at(4i)"]     #変更出勤時間(時)
+      @edit_started_time_5i = params[:editaprvls][id][:"change_started_at(5i)"]     #変更出勤時間(分)
+      @edit_finished_time_4i = params[:editaprvls][id][:"change_finished_at(4i)"]   #変更退社時間(時)
+      @edit_finished_time_5i = params[:editaprvls][id][:"change_finished_at(5i)"]   #変更退社時間(分)
+      @note = params[:editaprvls][id][:"note"]                                      #備考
 
-         editaprvl = Editaprvl.find(id)
-         editaprvl.update_attributes(item)
-         
-         @yokujitsu_kakunin_check = ""
-         @edit_started_time = ""
-         @edit_finished_time = ""
+      #editaprvl.user_id = params[:"shonin#{id}"]
+      #@id = id
+      #指示確認㊞欄に入力があれば書き込み ← できてる？
+      @shonin_id = params[:"shonin#{id}"]
+      editaprvl.user_id = params[:id]
+      editaprvl.change_target_person_id = @shonin_id
 
-         @yokujitsu_kakunin_check = params[:"yokujitsu_kakunin#{id}"]         #翌日(チェック)
-         #@edit_started_time = params[:editaprvls][id][:change_started_at]    #変更出勤時間
-         #@edit_finished_time = params[:editaprvls][id][:change_finished_at]  #変更退社時間
-         if params[:editaprvls][id][:change_started_at] != "" then
-           @edit_started_time = Time.parse(editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") + " " + editaprvl.change_started_at.strftime("%H:%M") + " +0900")     #変更出勤時間
-         end
-         if params[:editaprvls][id][:change_finished_at] != "" then
-           @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") + " " + editaprvl.change_finished_at.strftime("%H:%M") + " +0900")   #変更退社時間
-         end
-         
-#        @finished_plan_at = Time.parse(@slct_date + " " + @finished_plan_time.strftime("%H:%M") + " +0900")
-         #退社時間変更申請日時の翌日設定
-         #翌日フラグを見ながら書き込み ← 各日での翌日フラグを取得して、翌日日時取得後、退社日時を上書き
-         if @yokujitsu_kakunin_check == "1" then
-#             #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
-#             @finished_plan_at = @finished_plan_at.tomorrow
-           @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.tomorrow.strftime("%Y-%m-%d") + " " + editaprvl.change_finished_at.strftime("%H:%M") + " +0900")
-         end         
-         
-         #editaprvl.user_id = params[:"shonin#{id}"]
-         #@id = id
-         #指示確認㊞欄に入力があれば書き込み ← できてる？
-         @shonin_id = params[:"shonin#{id}"]
-         editaprvl.user_id = params[:id]
-         editaprvl.change_target_person_id = @shonin_id
-         if @shonin_id != ""
-           editaprvl.change_aprvl_status = "申請中"
-         end
-         editaprvl.change_started_at = @edit_started_time
-         editaprvl.change_finished_at = @edit_finished_time
-         # !!!お試し!!!
-         #editaprvl.change_first_started_at = @edit_started_time
-         #editaprvl.change_first_finished_at = @edit_finished_time
-         # !!!お試し!!!
-         editaprvl.save
-       end
-       flash[:success] = "勤怠情報を更新しました。" #{@shonin_id}"
-       redirect_to user_path(@user, params:{first_day: params[:date]})
-#     else
-#       flash[:danger] = "不正な時間入力がありました、再入力してください。"
-#       redirect_to edit_attendances_path(@user, params[:date])
-     #end
-   end
+      ### 入力チェック ###
+      if @shonin_id != "" and (@edit_started_time_4i == "" or @edit_started_time_5i == "" or @edit_started_time_4i == nil or @edit_started_time_5i == nil) then
+        @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
+        @error_hnt = "START_NG"
+        #@id = id
+      elsif @shonin_id != "" and (@edit_finished_time_4i == "" or @edit_finished_time_5i == "" or @edit_finished_time_4i == nil or @edit_finished_time_5i == nil) then
+        @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
+        @error_hnt = "FINISH_NG"
+      end
+      
+      # else
+      if @edit_started_time_4i != "" and @edit_started_time_5i != "" and @edit_started_time_4i != nil and @edit_started_time_5i != nil then
+        #@edit_started_time = Time.parse(editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") + " " + editaprvl.change_started_at.strftime("%H:%M") + " +0900") #変更出勤時間
+        @edit_started_time = Time.parse(editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") + " " + @edit_started_time_4i.to_s + ":" + @edit_started_time_5i.to_s + " +0900")    #変更出勤時間
+      end
+      if @edit_finished_time_4i != "" and @edit_finished_time_5i != "" and @edit_finished_time_4i != nil and @edit_finished_time_5i != nil then
+        @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") + " " + @edit_finished_time_4i.to_s + ":" + @edit_finished_time_5i.to_s + " +0900") #変更退社時間
+      end
+       
+#       @finished_plan_at = Time.parse(@slct_date + " " + @finished_plan_time.strftime("%H:%M") + " +0900")
+      #退社時間変更申請日時の翌日設定
+      #翌日フラグを見ながら書き込み ← 各日での翌日フラグを取得して、翌日日時取得後、退社日時を上書き
+      if @yokujitsu_kakunin_check == "1" then
+#         #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
+#         @finished_plan_at = @finished_plan_at.tomorrow
+#         @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.tomorrow.strftime("%Y-%m-%d") + " " + editaprvl.change_finished_at.strftime("%H:%M") + " +0900")
+        @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.tomorrow.strftime("%Y-%m-%d") + " " + @edit_finished_time_4i.to_s + ":" + @edit_finished_time_5i.to_s + " +0900")
+      end
+      
+      if @shonin_id != "" and @edit_started_time.present? and @edit_finished_time.present?
+        if @edit_started_time > @edit_finished_time
+          @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
+          @error_hnt = "ZENGO_NG"
+        end
+      end
+
+      if @shonin_id != ""
+        editaprvl.change_aprvl_status = "申請中"
+      end
+      editaprvl.change_started_at = @edit_started_time
+      editaprvl.change_finished_at = @edit_finished_time
+      editaprvl.note = @note
+       # !!!お試し!!!
+       #editaprvl.change_first_started_at = @edit_started_time
+       #editaprvl.change_first_finished_at = @edit_finished_time
+       # !!!お試し!!!
+      if @error_hnt == "OK"
+        editaprvl.save
+      end
+    end
+      
+    if @error_hnt == "OK"
+      flash[:success] = "勤怠情報を更新しました。" #{@shonin_id}"
+      redirect_to user_path(@user, params:{first_day: params[:date]})
+    else
+      if @error_hnt == "START_NG"
+        flash[:danger] = "「#{@edit_kintai_req_on}」の出社時間を入力してください。"
+      elsif @error_hnt == "FINISH_NG"
+        flash[:danger] = "「#{@edit_kintai_req_on}」の退社時間を入力してください。"
+      elsif @error_hnt == "ZENGO_NG"
+        flash[:danger] = "「#{@edit_kintai_req_on}」の退社が出社より早い時間です。"
+      else
+        flash[:danger] = "不正な時間入力がありました、再入力してください。"
+      end
+      # redirect_to edit_attendances_path(@user, params[:date])
+      # redirect_to user_path(@user, params:{first_day: params[:date]})
+      @first_day = first_day(params[:date])
+      redirect_to edit_editaprvls_path(@user, @first_day)
+    end
+  end
 
   # ### 2．勤怠編集(承認者側)関係 #####-------------------------------------------------------------------------   
   # 2-1.画面表示(勤怠編集承認モーダル画面)
@@ -287,7 +334,7 @@ end
 #             #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
 #             @finished_plan_at = @finished_plan_at.tomorrow
 #           end
-#           #@calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900")
+#           #@calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.designated_work_end_time.strftime("%H:%M") + " +0900")
 
 #           #@zangyo_apr = Zangyoaprvl.new(user_id: @shonin_id, zangyo_aprvl_req_on: @slct_date, zangyo_aprvl_status: "申請中", zangyo_finished_at: @finished_plan_at.to_s, 
 #                                         #zangyo_note: @gyomu_memo.to_s, zangyo_target_person_id: @user.id, yuko_flag: 1)

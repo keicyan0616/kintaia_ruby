@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191113145507) do
+ActiveRecord::Schema.define(version: 20191119025753) do
 
   create_table "approvals", force: :cascade do |t|
     t.integer "user_id"
@@ -63,16 +63,16 @@ ActiveRecord::Schema.define(version: 20191113145507) do
     t.string "email"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "department"
     t.integer "employer_number"
     t.string "uid"
-    t.datetime "basic_time", default: "2019-02-19 22:30:00"
-    t.datetime "work_time", default: "2019-02-19 23:00:00"
-    t.datetime "work_end_time", default: "2019-02-19 23:00:00"
+    t.datetime "basic_work_time", default: "2019-11-18 23:00:00"
+    t.datetime "designated_work_start_time", default: "2019-11-19 00:00:00"
+    t.datetime "designated_work_end_time", default: "2019-11-19 09:00:00"
     t.boolean "superior"
     t.boolean "admin"
     t.string "password_digest"
     t.string "remember_digest"
+    t.string "affiliation"
   end
 
   create_table "zangyoaprvls", force: :cascade do |t|

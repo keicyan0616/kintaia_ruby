@@ -95,16 +95,16 @@ class UsersController < ApplicationController
   end
 
   def update_basic_info
-    @user = User.find(params[:id])
-    @users = User.all
+     @user = User.find(params[:id])
+    # @users = User.all
     
-    @users.each do |user1|
-      if !user1.update_attributes(basic_info_params)
-        render 'edit_basic_info'
-      end
-    end
-    flash[:success] = "基本情報を更新しました。"
-    redirect_to @user   
+    # @users.each do |user1|
+    #   if !user1.update_attributes(basic_info_params)
+    #     render 'edit_basic_info'
+    #   end
+    # end
+    # flash[:success] = "基本情報を更新しました。"
+     redirect_to @user   
   end
   
   # ### 1．勤怠申請関係 #####---------------------------------------------------------------------------------
@@ -260,11 +260,11 @@ class UsersController < ApplicationController
 private
 
   def user_params
-    params.require(:user).permit(:name, :email, :department, :employer_number, :uid, :password, :basic_time, :work_time, :work_end_time )
+    params.require(:user).permit(:name, :email, :affiliation, :employer_number, :uid, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time )
   end
 
   def basic_info_params
-    params.require(:user).permit(:basic_time, :work_time)
+    params.require(:user).permit(:basic_work_time, :designated_work_start_time)
   end
     # beforeアクション
 

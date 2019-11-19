@@ -113,7 +113,7 @@ class AttendancesController < ApplicationController
             #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
             @finished_plan_at = @finished_plan_at.tomorrow
           end
-          #@calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900")
+          #@calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.designated_work_end_time.strftime("%H:%M") + " +0900")
 
           #@zangyo_apr = Zangyoaprvl.new(user_id: @shonin_id, zangyo_aprvl_req_on: @slct_date, zangyo_aprvl_status: "申請中", zangyo_finished_at: @finished_plan_at.to_s, 
                                         #zangyo_note: @gyomu_memo.to_s, zangyo_target_person_id: @user.id, yuko_flag: 1)

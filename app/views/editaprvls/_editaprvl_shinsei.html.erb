@@ -86,7 +86,7 @@
               <%= @attendance.started_at.strftime("%H") if @attendance.started_at.present? %> <!--.strftime("%H") %>-->
             </td>
             <!-- 変更前 出社(分) -->
-            <%# @calc_work_datetime = Time.parse(editaprvl_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.work_end_time.strftime("%H:%M") + " +0900") %>
+            <%# @calc_work_datetime = Time.parse(editaprvl_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.designated_work_end_time.strftime("%H:%M") + " +0900") %>
             <td>
               <%= @attendance.started_at.strftime("%M") if @attendance.started_at.present? %>
             </td>
