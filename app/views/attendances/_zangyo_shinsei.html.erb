@@ -49,7 +49,7 @@
               <td><%= af.text_field :zangyo_note, class: "form-control" %><!-- <input type = "text" name = "zangyo_note" class = "select-zangyo-shonin2">--></td>
               <td>
                 <div class = 'select-zangyo-shonin'>
-                  <%= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => @shonin_id_show}, {class: "select-zangyo-shonin2"} %>
+                  <%= f.select :name, User.where(superior: true).where.not(id: @user.id).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => @shonin_id_show}, {class: "select-zangyo-shonin2"} %>
                 </div>
               </td>
             </tr>

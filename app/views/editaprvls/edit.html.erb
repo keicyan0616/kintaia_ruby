@@ -57,7 +57,7 @@
               <td><%= af.text_field :note, class: "form-control bootstrap-date", readonly: readOnlyFlg %></td>
               <td>
                 <div class = 'select-zangyo-shonin'>
-                  <%= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => day.change_target_person_id}, \
+                  <%= f.select :name, User.where(superior: true).where.not(id: day.user_id).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => day.change_target_person_id}, \
                       {class: "form-control bootstrap-date", name: "shonin#{day.id}", :disabled => readOnlyFlg} %>
                 </div>
               </td>

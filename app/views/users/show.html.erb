@@ -192,6 +192,7 @@
           <td><%= day.note %></td>
           <!-- 残業申請データの取得(原則1件のみのためfind_byを使用) -->
           <% @zangyo_shinsei_data = Zangyoaprvl.find_by(zangyo_target_person_id: params[:id], zangyo_aprvl_req_on: "#{day.worked_on}") %>
+          <% zangyo_status_msg = "" %>
           <% if @zangyo_shinsei_data.present? %>
             <!-- 終了予定時間(時) -->
             <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:hour) if day.finished_plan_at.present? %></td>
@@ -202,7 +203,7 @@
             <td><%= working_times(@calc_work_datetime, @zangyo_shinsei_data.zangyo_finished_at) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
             <!-- 業務処理内容 -->
             <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %><%#= day.gyomu_memo %></td>
-            <!-- 指示者確認㊞ -->
+            <!-- 指示者確認㊞の元文字作成-->
             <% zangyo_aprvl_status_l = @zangyo_shinsei_data.zangyo_aprvl_status %>
             <% if zangyo_aprvl_status_l == "申請中" %>
             <%   zangyo_status_msg = "残業申請中" %>
@@ -213,12 +214,40 @@
             <% else %>
             <%   zangyo_status_msg = "" %>
             <% end%>
+          <% end %>
+          
+          <!-- 勤怠変更申請データの取得(原則1件のみのためfind_byを使用) -->
+          <% @editaprvl_shinsei_data = Editaprvl.find_by(user_id: params[:id], change_kintai_req_on: "#{day.worked_on}") %>
+          <% change_status_msg = "" %>
+          <% if @editaprvl_shinsei_data.present? %>
+            <!-- 指示者確認㊞の元文字作成-->
+            <% change_aprvl_status_l = @editaprvl_shinsei_data.change_aprvl_status %>
+            <% if change_aprvl_status_l == "申請中" %>
+            <%   change_status_msg = "勤怠編集申請中" %>
+            <% elsif change_aprvl_status_l == "否認" %>
+            <%   change_status_msg = "勤怠編集否認" %>
+            <% elsif change_aprvl_status_l == "承認" %>
+            <%   change_status_msg = "勤怠編集承認済" %>
+            <% else %>
+            <%   change_status_msg = "" %>
+            <% end%>
+          <% end %>
+
+          <% if !@zangyo_shinsei_data.present? %>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          <% end %>
+
+          <!-- 指示者確認㊞ 表示-->   
+          <% if zangyo_status_msg != "" and change_status_msg == "" %> 
             <td><%= zangyo_status_msg %></td>
+          <% elsif zangyo_status_msg == "" and change_status_msg != "" %> 
+            <td><%= change_status_msg %></td>
+          <% elsif zangyo_status_msg != "" and change_status_msg != "" %> 
+            <td><%= zangyo_status_msg %><br><%= change_status_msg %></td>
           <% else%>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
             <td></td>
           <% end %>
         </tr>
@@ -240,7 +269,7 @@
           <%#= form_for @user do |f| %>
           <%= form_for(@user, url: month_shinsei_path(params: {id: @user.id, first_day: @first_day}), method: :patch) do |f| %>
             <div class = 'select-shonin'>
-              <%= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, :include_blank => true %>
+              <%= f.select :name, User.where(superior: true).where.not(id: @user.id).map{|o| [o.name, o.id]}, :include_blank => true %>
             </div>
             <%= f.submit "申請", class: "btn btn-primary btn-shinsei" %>
           <% end %>

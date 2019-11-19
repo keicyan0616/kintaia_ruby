@@ -74,11 +74,13 @@ class EditaprvlsController < ApplicationController
       editaprvl.change_target_person_id = @shonin_id
 
       ### 入力チェック ###
-      if @shonin_id != "" and (@edit_started_time_4i == "" or @edit_started_time_5i == "" or @edit_started_time_4i == nil or @edit_started_time_5i == nil) then
+      if @shonin_id != "" and (@edit_started_time_4i == "" or @edit_started_time_5i == "" or @edit_started_time_4i == nil or @edit_started_time_5i == nil) \
+          and editaprvl.change_kintai_req_on < Date.tomorrow then
         @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
         @error_hnt = "START_NG"
         #@id = id
-      elsif @shonin_id != "" and (@edit_finished_time_4i == "" or @edit_finished_time_5i == "" or @edit_finished_time_4i == nil or @edit_finished_time_5i == nil) then
+      elsif @shonin_id != "" and (@edit_finished_time_4i == "" or @edit_finished_time_5i == "" or @edit_finished_time_4i == nil or @edit_finished_time_5i == nil) \
+          and editaprvl.change_kintai_req_on < Date.tomorrow then
         @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
         @error_hnt = "FINISH_NG"
       end
@@ -102,6 +104,7 @@ class EditaprvlsController < ApplicationController
         @edit_finished_time = Time.parse(editaprvl.change_kintai_req_on.tomorrow.strftime("%Y-%m-%d") + " " + @edit_finished_time_4i.to_s + ":" + @edit_finished_time_5i.to_s + " +0900")
       end
       
+      #出社、退社時間の入力チェック
       if @shonin_id != "" and @edit_started_time.present? and @edit_finished_time.present?
         if @edit_started_time > @edit_finished_time
           @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
@@ -109,8 +112,10 @@ class EditaprvlsController < ApplicationController
         end
       end
 
-      if @shonin_id != ""
+      if @shonin_id != "" and editaprvl.change_kintai_req_on < Date.tomorrow
         editaprvl.change_aprvl_status = "申請中"
+      else
+        editaprvl.change_aprvl_status = ""
       end
       editaprvl.change_started_at = @edit_started_time
       editaprvl.change_finished_at = @edit_finished_time
@@ -172,10 +177,11 @@ class EditaprvlsController < ApplicationController
             @attend_data = Attendance.find_by(user_id: edit_app_data.user_id, worked_on: edit_app_data.change_kintai_req_on)
             ### ここで変更前の出勤、退勤時間が入ってなかったらAttendanceテーブルから取得して、Editaprvlテーブルに書き込む ###
             if @attend_data.present?
-              edit_app_data.change_first_started_at = @attend_data.started_at if edit_app_data.change_first_started_at == nil and edit_app_data.change_started_at == nil
-              edit_app_data.change_first_finished_at = @attend_data.finished_at if edit_app_data.change_first_finished_at == nil and edit_app_data.change_finished_at == nil
+              edit_app_data.change_first_started_at = @attend_data.started_at if edit_app_data.approval_at == nil
+              edit_app_data.change_first_finished_at = @attend_data.finished_at if edit_app_data.approval_at == nil
               @attend_data.started_at = edit_app_data.change_started_at
               @attend_data.finished_at = edit_app_data.change_finished_at
+              @attend_data.note = edit_app_data.note
               @attend_data.save
             end
             edit_app_data.approval_at = Time.now
