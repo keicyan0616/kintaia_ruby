@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :correct_user,   only: [:edit, :show]
   before_action :admin_user,     only: [:index, :update, :destroy, :edit_basic_info, :update_basic_info]
   before_action :superior_user,  only: [:kintai_kakunin]
-  before_action :not_admin_user, only: [:show]
+  before_action :not_admin_user, only: [:edit, :show]
   #before_action :correct_or_admin_user, only: [:show, :update]
   #before_action :correct_or_superior_user, only: [:update]
   protect_from_forgery except: :soushin_kintai # soushin_kintaiアクションを除外
@@ -16,7 +16,7 @@ class UsersController < ApplicationController
 
   # ### 勤怠表示 #####
   def show
-    logger.debug "ここを通ったよ(002)"
+    #logger.debug "ここを通ったよ(002)"
     @user = User.find(params[:id])
     @first_day = first_day(params[:first_day])
     @last_day = @first_day.end_of_month
@@ -87,10 +87,16 @@ class UsersController < ApplicationController
   end
   
   def destroy
-    logger.debug "ここを通ったよ(022)"
-    User.find(params[:id]).destroy
-    flash[:success] = "削除しました。"
-    redirect_to users_url
+    #logger.debug "ここを通ったよ(022)"
+    @user = User.find(params[:id])
+    if !current_user?(@user)
+      User.find(params[:id]).destroy
+      flash[:success] = "ユーザー情報を削除しました。"
+      redirect_to users_url
+    else
+      flash[:danger] = "自分自身のユーザー情報は削除できません。"
+      redirect_to users_url
+    end
   end
 
   def edit_basic_info
@@ -105,15 +111,15 @@ class UsersController < ApplicationController
   
   # ### 1．勤怠申請関係 #####---------------------------------------------------------------------------------
   def kintai_shinsei
-    logger.debug "ここを通ったよ(003)"
+    #logger.debug "ここを通ったよ(003)"
     @user = User.find(params[:id])
-    @apr = Approval.where('user_id = ?', params[:id]).order(target_person_id: :asc).order(kintai_req_on: :asc)
+    @apr = Approval.where('user_id = ?', params[:id]).where.not(approval_status: "承認").where.not(approval_status: "否認").order(target_person_id: :asc).order(kintai_req_on: :asc)
   end
 
   def soushin_kintai
-    logger.debug "ここを通ったよ(005)"
+    #logger.debug "ここを通ったよ(005)"
     @user = User.find(params[:id])
-    @apr = Approval.where('user_id = ?', params[:id]).order(target_person_id: :asc).order(kintai_req_on: :asc)
+    @apr = Approval.where('user_id = ?', params[:id]).where.not(approval_status: "承認").where.not(approval_status: "否認").order(target_person_id: :asc).order(kintai_req_on: :asc)
     
     @apr.each do |app_data|
       @app_tmp = app_data.id
@@ -132,7 +138,7 @@ class UsersController < ApplicationController
   end
   
   def kintai_kakunin
-    logger.debug "ここを通ったよ(006)"
+    #logger.debug "ここを通ったよ(006)"
     @user = User.find(params[:id])
     
     if @user.admin
@@ -173,15 +179,23 @@ class UsersController < ApplicationController
     @shonin_id = params[:user][:name]
     @first_day = first_day(params[:first_day])
     
-    @apr_check_exist = Approval.find_by(kintai_req_on: @first_day, target_person_id: @user.id)
-    if @apr_check_exist
+    @apr_check_exist = Approval.where(kintai_req_on: @first_day).where(target_person_id: @user.id).where.not(approval_status: "否認").count
+    if @apr_check_exist > 0
       flash[:danger] = "既に申請済みです。"
     elsif @shonin_id == ""
       flash[:info] = "申請者を選択してください。"
     else
-      @apr = Approval.new(user_id: @shonin_id, kintai_req_on: @first_day, approval_status: "申請中", target_person_id: @user.id)
+      @apr = Approval.find_by(kintai_req_on: @first_day, target_person_id: @user.id)
+      if @apr.present?
+        @apr.user_id = @shonin_id
+        @apr.kintai_req_on = @first_day
+        @apr.approval_status = "申請中"
+        @apr.target_person_id = @user.id
+      else
+        @apr = Approval.new(user_id: @shonin_id, kintai_req_on: @first_day, approval_status: "申請中", target_person_id: @user.id)
+      end
       @apr.save
-      flash[:success] = "申請を送信しました。" # + @num.to_s
+      flash[:success] = "申請を送信しました。"
     end
     redirect_to user_path(params: {id: @user.id, first_day: @first_day})
   end
@@ -189,16 +203,18 @@ class UsersController < ApplicationController
   # ### 2．残業申請(承認者側)関係 #####-------------------------------------------------------------------------
   # 2-1.画面表示(残業申請承認モーダル画面)
   def zangyo_shinsei_approval
-    logger.debug "ここを通ったよ(012)"
+    #logger.debug "ここを通ったよ(012)"
     @user = User.find(params[:id])
-    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where(yuko_flag: 1).order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
+    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where.not(zangyo_aprvl_status: "否認").where(yuko_flag: 1)\
+                  .order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
   end
   
   # 2-2.残業申請承認(残業申請承認モーダル画面)
   def soushin_zangyo_shinsei
-    logger.debug "ここを通ったよ(013)"
+    #logger.debug "ここを通ったよ(013)"
     @user = User.find(params[:id])
-    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where(yuko_flag: 1).order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
+    @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where.not(zangyo_aprvl_status: "否認").where(yuko_flag: 1)\
+                  .order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
     
     @zangyo_apr.each do |zangyo_app_data|
       @app_tmp = zangyo_app_data.id

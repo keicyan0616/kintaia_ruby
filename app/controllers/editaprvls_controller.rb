@@ -1,6 +1,7 @@
 class EditaprvlsController < ApplicationController
   before_action :logged_in_user, only: [:edit, :update]
   before_action :correct_user,   only: [:edit, :update, :editaprvl_shinsei, :soushin_henko_shinsei, :kintai_log]
+  before_action :not_admin_user, only: [:edit]
 
   # ### 1．勤怠編集関係 ######
   # --- 勤怠編集画面 表示 -----
@@ -124,15 +125,16 @@ class EditaprvlsController < ApplicationController
   def editaprvl_shinsei
     #logger.debug "ここを通ったよ(025)"
     @user = User.find(params[:id])
-    @editaprvls = Editaprvl.where(change_target_person_id: params[:id]).where.not(change_aprvl_status: "承認").where.not(change_aprvl_status: nil).order(user_id: :asc).order(change_kintai_req_on: :asc)
+    @editaprvls = Editaprvl.where(change_target_person_id: params[:id]).where.not(change_aprvl_status: "承認").where.not(change_aprvl_status: "否認").where.not(change_aprvl_status: nil)\
+                  .order(user_id: :asc).order(change_kintai_req_on: :asc)
   end
 
   # 2-2.変更申請承認(勤怠編集申請承認モーダル画面)
   def soushin_henko_shinsei
     #logger.debug "ここを通ったよ(026)"
     @user = User.find(params[:id])
-    @editaprvls = Editaprvl.where(change_target_person_id: params[:id]).where.not(change_aprvl_status: "承認").where.not(change_aprvl_status: nil).order(user_id: :asc)\
-                  .order(change_kintai_req_on: :asc)
+    @editaprvls = Editaprvl.where(change_target_person_id: params[:id]).where.not(change_aprvl_status: "承認").where.not(change_aprvl_status: "否認").where.not(change_aprvl_status: nil)\
+                  .order(user_id: :asc).order(change_kintai_req_on: :asc)
     
     @editaprvls.each do |edit_app_data|
       @app_tmp = edit_app_data.id
@@ -209,5 +211,9 @@ private
       @user = User.find(params[:id])
       redirect_to(root_url) unless current_user?(@user)
     end
-  
+    
+    def not_admin_user
+      redirect_to(root_url) if current_user.admin?
+    end
+
 end
