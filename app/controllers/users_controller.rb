@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :correct_user,   only: [:edit, :show]
   before_action :admin_user,     only: [:index, :update, :destroy, :edit_basic_info, :update_basic_info]
   before_action :superior_user,  only: [:kintai_kakunin]
-  before_action :not_admin_user, only: [:edit, :show]
+  before_action :not_admin_user, only: [:show]
   #before_action :correct_or_admin_user, only: [:show, :update]
   #before_action :correct_or_superior_user, only: [:update]
   protect_from_forgery except: :soushin_kintai # soushin_kintaiアクションを除外
