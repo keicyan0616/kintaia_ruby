@@ -241,12 +241,13 @@
             <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %></td>
             <!-- 指示者確認㊞の元文字作成-->
             <% zangyo_aprvl_status_l = @zangyo_shinsei_data.zangyo_aprvl_status %>
+            <% user_name_l = User.find_by(id: "#{@zangyo_shinsei_data.user_id}") %>
             <% if zangyo_aprvl_status_l == "申請中" %>
-            <%   zangyo_status_msg = "残業申請【申請中】" %>
+            <%   zangyo_status_msg = "#{user_name_l.name}：残業申請【申請中】" %>
             <% elsif zangyo_aprvl_status_l == "否認" %>
-            <%   zangyo_status_msg = "残業申請【否認】" %>
+            <%   zangyo_status_msg = "#{user_name_l.name}：残業申請【否認】" %>
             <% elsif zangyo_aprvl_status_l == "承認" %>
-            <%   zangyo_status_msg = "残業申請【承認済】" %>
+            <%   zangyo_status_msg = "#{user_name_l.name}：残業申請【承認済】" %>
             <% else %>
             <%   zangyo_status_msg = "" %>
             <% end%>
@@ -258,12 +259,13 @@
           <% if @editaprvl_shinsei_data.present? %>
             <!-- 指示者確認㊞の元文字作成-->
             <% change_aprvl_status_l = @editaprvl_shinsei_data.change_aprvl_status %>
+            <% user_name_l = User.find_by(id: "#{@editaprvl_shinsei_data.change_target_person_id}") %>
             <% if change_aprvl_status_l == "申請中" %>
-            <%   change_status_msg = "勤怠編集【申請中】" %>
+            <%   change_status_msg = "#{user_name_l.name}：勤怠編集【申請中】" %>
             <% elsif change_aprvl_status_l == "否認" %>
-            <%   change_status_msg = "勤怠編集【否認】" %>
+            <%   change_status_msg = "#{user_name_l.name}：勤怠編集【否認】" %>
             <% elsif change_aprvl_status_l == "承認" %>
-            <%   change_status_msg = "勤怠編集【承認済】" %>
+            <%   change_status_msg = "#{user_name_l.name}：勤怠編集【承認済】" %>
             <% else %>
             <%   change_status_msg = "" %>
             <% end%>
