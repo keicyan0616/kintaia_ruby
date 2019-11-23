@@ -1,31 +1,41 @@
 <header class="navbar navbar-fixed-top navbar-inverse">
   <div class="container">
     <% if logged_in? %>
-      <%= link_to "勤怠管理システム", current_user, id: "logo" %>
+      <% if current_user.admin? %>
+        <%= link_to "勤怠システム", users_path, id: "logo" %>
+      <% else %>
+        <%= link_to "勤怠システム", current_user, id: "logo" %>
+      <% end %>
     <% else %>
-      <%= link_to "勤怠管理システム", root_path, id: "logo" %>
+      <%= link_to "勤怠システム", root_path, id: "logo" %>
     <% end %>
     <nav>
       <ul class="nav navbar-nav navbar-right">
         <% if logged_in? %>
-          <li><%= link_to "トップへ", current_user %></li>
+          <% if current_user.admin? %>
+            <li><%= link_to "トップへ", users_path %></li>
+          <% else %>
+            <li><%= link_to "トップへ", current_user %></li>
+          <% end %>
         <% else %>  
           <li><%= link_to "トップへ", root_path %></li>
         <% end %>
         
         <% if logged_in? %>
-          <% if current_user.superior? %>
+          <% if current_user.admin? %>
             <li><%= link_to "ユーザ一覧", users_path %></li>
             <li><%= link_to "出勤社員一覧", shukkin_list_path %></li>
             <li><%= link_to "拠点情報の修正", kyoten_list_path %></li>
-            <li><%= link_to "基本情報の修正", basic_info_path(current_user) %></li> <!--basic_info_path(current_user)-->
+            <li><%= link_to "基本情報の修正", basic_info_path(current_user) %></li>
           <% end %>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               アカウント<b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-              <li><%= link_to "ユーザー勤怠情報表示", current_user %></li>
+              <% if !current_user.admin? %>
+                <li><%= link_to "勤怠", current_user %></li>
+              <% end %>
               <li><%= link_to "設定", edit_user_path(current_user) %></li>
               <li class="divider"></li>
               <li>

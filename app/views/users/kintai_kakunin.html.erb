@@ -21,13 +21,15 @@
         指定勤務開始時間　<%= format_basic_time(@user.designated_work_start_time) %><br>
         指定勤務終了時間　<%= format_basic_time(@user.designated_work_end_time) %> 
       </td>
-      <td>基本時間　<%= format_basic_time(@user.basic_work_time) %></td>
+      <td colspan = "3">基本時間　<%= format_basic_time(@user.basic_work_time) %></td>
       <td>初日　<%= @first_day.to_s(:date) %></td>
     </tr>
     <tr>
-      <td>所属：<%= @user.affiliation.present? ? @user.affiliation : "未設定" %></td>
-      <td>氏名：<%= @user.name %></td>
-      <td>出勤日数：<%= @worked_sum %>日</td>
+      <td>所属　<%= @user.affiliation.present? ? @user.affiliation : "未設定" %></td>
+      <td>氏名　<%= @user.name %></td>
+      <td>コード</td>
+      <td><%= @user.employer_number %></td>
+      <td>出勤日数　<%= @worked_sum %>日</td>
       <td>締日　<%= @last_day.to_s(:date) %></td>
     </tr>
   </table>
@@ -53,7 +55,7 @@
   -->
   <div>&emsp;</div>
   <!-- 勤怠明細部 -->
-  <table class = "table-bordered table-striped table-condensed">
+  <table class = "table-bordered table-condensed table-hover">
     <thead>
       <tr> <!--rowspan:縦結合、colspan：横結合-->
         <th rowspan = "3">残業申請</th>
@@ -149,31 +151,90 @@
             <%# if day.worked_on == Date.today && day.started_at.present? && day.finished_at.nil? %>
               <%#= button_to "退社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
             <%# end %>
-          </td>
-          <!-- 在社時間(計算) -->
           <td>
             <% if day.started_at.present? && day.finished_at.present? %>
-              <%#= working_times(day.started_at, day.finished_at) %>
-              <%= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
-              <%# seconds = (day.finished_at - day.started_at).to_i %>
-              <% seconds = (Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min) - Time.parse(day.started_at.to_s(:hour) + ":" + start_min)).to_i %>
+              <% @diff_sec = (Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min) - Time.parse(day.started_at.to_s(:hour) + ":" + start_min)).to_i %>
+              
+              <% if @diff_sec < 0 %>
+                <% @diff_sec = 86400 + @diff_sec %>
+                <%= format("%.2f", 24 + working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)).to_f) %>
+              <% else %>                
+                <%= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
+              <% end %>
+
+              <% seconds = @diff_sec %>
               <% @total_seconds = @total_seconds.to_i + seconds %>
             <% end %>
           </td>
           <!-- 備考 -->
           <td><%= day.note %></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <!-- 残業申請データの取得(原則1件のみのためfind_byを使用) -->
+          <% @zangyo_shinsei_data = Zangyoaprvl.find_by(zangyo_target_person_id: params[:id], zangyo_aprvl_req_on: "#{day.worked_on}") %>
+          <% zangyo_status_msg = "" %>
+          <% if @zangyo_shinsei_data.present? %>
+            <!-- 終了予定時間(時) -->
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:hour) if day.finished_plan_at.present? %></td>
+            <!-- 終了予定時間(分) -->
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:min) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:min) if day.finished_plan_at.present? %></td>
+            <!-- 時間外時間 -->
+            <% @calc_work_datetime = Time.parse(@zangyo_shinsei_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @user.designated_work_end_time.strftime("%H:%M") + " +0900") %>
+            <td><%= working_times(@calc_work_datetime, @zangyo_shinsei_data.zangyo_finished_at) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
+            <!-- 業務処理内容 -->
+            <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %><%#= day.gyomu_memo %></td>
+            <!-- 指示者確認㊞の元文字作成-->
+            <% zangyo_aprvl_status_l = @zangyo_shinsei_data.zangyo_aprvl_status %>
+            <% if zangyo_aprvl_status_l == "申請中" %>
+            <%   zangyo_status_msg = "残業申請【申請中】" %>
+            <% elsif zangyo_aprvl_status_l == "否認" %>
+            <%   zangyo_status_msg = "残業申請【否認】" %>
+            <% elsif zangyo_aprvl_status_l == "承認" %>
+            <%   zangyo_status_msg = "残業申請【承認済】" %>
+            <% else %>
+            <%   zangyo_status_msg = "" %>
+            <% end%>
+          <% end %>
+          
+          <!-- 勤怠変更申請データの取得(原則1件のみのためfind_byを使用) -->
+          <% @editaprvl_shinsei_data = Editaprvl.find_by(user_id: params[:id], change_kintai_req_on: "#{day.worked_on}") %>
+          <% change_status_msg = "" %>
+          <% if @editaprvl_shinsei_data.present? %>
+            <!-- 指示者確認㊞の元文字作成-->
+            <% change_aprvl_status_l = @editaprvl_shinsei_data.change_aprvl_status %>
+            <% if change_aprvl_status_l == "申請中" %>
+            <%   change_status_msg = "勤怠編集【申請中】" %>
+            <% elsif change_aprvl_status_l == "否認" %>
+            <%   change_status_msg = "勤怠編集【否認】" %>
+            <% elsif change_aprvl_status_l == "承認" %>
+            <%   change_status_msg = "勤怠編集【承認済】" %>
+            <% else %>
+            <%   change_status_msg = "" %>
+            <% end%>
+          <% end %>
+
+          <% if !@zangyo_shinsei_data.present? %>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          <% end %>
+
+          <!-- 指示者確認㊞ 表示-->   
+          <% if zangyo_status_msg != "" and change_status_msg == "" %> 
+            <td><%= zangyo_status_msg %></td>
+          <% elsif zangyo_status_msg == "" and change_status_msg != "" %> 
+            <td><%= change_status_msg %></td>
+          <% elsif zangyo_status_msg != "" and change_status_msg != "" %> 
+            <td><%= zangyo_status_msg %><br><%= change_status_msg %></td>
+          <% else%>
+            <td></td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>
     <tfoot>
       <tr>
         <td></td>
-        <td colspan = "2"><%#= format_basic_time(@user.basic_work_time).to_f * @worked_sum %></td>
+        <td colspan = "2"></td>
         <td colspan = "6"></td>
         <td><%= working_times_sum(@total_seconds) unless @total_seconds.nil? %></td>
         <td></td>
@@ -182,18 +243,11 @@
         <td></td>
         <td></td>
         <td>
-          <div>所属長承認 未<div>
+          <div>所属長承認　<%= @apr_status_msg %><div>
           <div class = 'select-shonin'>
-          <%#= form_for @user do |f| %>
-            <%#= f.select :name, User.all.map{|o| [o.name, o.id]}, :include_blank => true %>
-          <%# end %>
           </div>
-          <%#= link_to "申請", "#", class: "btn btn-primary btn-shinsei" %>
         </td>
       </tr>
     </tfoot>
   </table>
 </div>
-
-<!--モーダルウインドウ表示-->
-<!--<div id="kintai-shinsei" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>-->

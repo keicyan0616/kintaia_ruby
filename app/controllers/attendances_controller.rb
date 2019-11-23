@@ -1,9 +1,10 @@
 class AttendancesController < ApplicationController
-  before_action :correct_or_admin_user,   only: [:edit]
+  before_action :correct_or_admin_user,   only: [:zangyo_shinsei]
+  before_action :admin_user,     only: [:shukkin_list]
 
   def create
     @user = User.find(params[:user_id])
-    @attendance = @user.attendances.find_by(worked_on: Date.today)
+    @attendance = @user.attendances.find_by(worked_on: Date.current)
     if @attendance.started_at.nil?
       @attendance.update_attributes(started_at: current_time)
       flash[:info] = 'おはようございます。'
@@ -152,7 +153,7 @@ class AttendancesController < ApplicationController
     @shukkin_users = []
 
     @users.each do |user| 
-      if @attendances = user.attendances.find_by(worked_on: Date.today, finished_at: nil)
+      if @attendances = user.attendances.find_by(worked_on: Date.current, finished_at: nil)
         @shukkin_users.push(user) if @attendances.started_at.present?
         #debugger
       end
@@ -169,7 +170,7 @@ class AttendancesController < ApplicationController
 
     respond_to do |format|
       format.csv do
-        send_data render_to_string, filename: "hoge.csv", type: :csv
+        send_data render_to_string, filename: "export.csv", type: :csv
       end
     end
   end
@@ -192,5 +193,9 @@ class AttendancesController < ApplicationController
     def correct_or_admin_user
       @user = User.find(params[:id])
       redirect_to(root_url) unless current_user?(@user) or current_user.admin?
+    end
+    
+    def admin_user
+      redirect_to(root_url) unless current_user.admin?
     end
 end

@@ -40,22 +40,61 @@
       <% if @apr_cnt >= 1 %>
         <% message_set = " #{@apr_cnt}件の通知があります" %>
         <% color_set = "red" %>
+        <% disabled_set = "" %>
+        <% float_set = "float: left;" %>
       <% else %>
         <% message_set = "" %>
-        <% color_set = "" %>
+        <% color_set = "black" %>
+        <% disabled_set = "disabled" %>
+        <% float_set = "" %>
       <% end %>
-      <%= link_to "【所属長承認申請のお知らせ】#{message_set}", shinsei_kintai_path(@user), remote: true, class: "shozoku-info", :style=>"color:#{color_set}" %>
+      <div>
+        <%= link_to "【所属長承認申請のお知らせ】", shinsei_kintai_path(@user), remote: true, class: "shozoku-info btn #{disabled_set}", \
+            :style=>"color:#{color_set}; #{float_set}" %>
+      </div>
+      <% if @apr_cnt >= 1 %>
+        <div class="shinsei-cnt" style="border: 4px solid red;"><font color="red"><%= message_set %></font></div>
+      <% end %>
     </div>
-    <div><%= link_to "【勤怠変更申請のお知らせ】", henko_shinsei_approval_path(@user), remote: true, class: "kintai-info" %></div>
+    <div>
+      <% if @edit_aprvl_cnt >= 1 %>
+        <% editapr_message_set = " #{@edit_aprvl_cnt}件の通知があります" %>
+        <% editapr_color_set = "red" %>
+        <% edit_disabled_set = "" %>
+        <% edit_float_set = "float: left;" %>
+      <% else %>
+        <% editapr_message_set = "" %>
+        <% editapr_color_set = "black" %>
+        <% edit_disabled_set = "disabled" %>
+        <% edit_float_set = "" %>
+      <% end %>
+      <div>
+        <%= link_to "【勤怠変更申請のお知らせ】", henko_shinsei_approval_path(@user), remote: true, class: "kintai-info btn #{edit_disabled_set}", \
+            :style=>"color:#{editapr_color_set}; #{edit_float_set}" %>
+      </div>
+      <% if @edit_aprvl_cnt >= 1 %>
+        <div class="shinsei-cnt" style="border: 4px solid red;"><font color="red"><%= editapr_message_set %></font></div>
+      <% end %>
+    </div>
     <div>
       <% if @zangyo_aprvl_cnt >= 1 %>
         <% zangyo_message_set = " #{@zangyo_aprvl_cnt}件の通知があります" %>
         <% zangyo_color_set = "red" %>
+        <% zangyo_disabled_set = "" %>
+        <% zangyo_float_set = "float: left;" %>
       <% else %>
         <% zangyo_message_set = "" %>
-        <% zangyo_color_set = "" %>
+        <% zangyo_color_set = "black" %>
+        <% zangyo_disabled_set = "disabled" %>
+        <% zangyo_float_set = "" %>
       <% end %>
-      <%= link_to "【残業申請のお知らせ】#{zangyo_message_set}", shinsei_zangyo_approval_path(@user), remote: true, class: "zangyou-info", :style=>"color:#{zangyo_color_set}" %>
+      <div>
+        <%= link_to "【残業申請のお知らせ】", shinsei_zangyo_approval_path(@user), remote: true, class: "zangyou-info btn #{zangyo_disabled_set}", \
+            :style=>"color:#{zangyo_color_set}; #{zangyo_float_set}" %>
+      </div>
+      <% if @zangyo_aprvl_cnt >= 1 %>
+        <div class="shinsei-cnt" style="border: 4px solid red;"><font color="red"><%= zangyo_message_set %></font></div>
+      <% end %>
     </div>
   <% end %>
   
@@ -138,7 +177,7 @@
           </td>
           <!-- 出社ボタン表示 -->
           <td>
-            <% if day.worked_on == Date.today && day.started_at.nil? %>
+            <% if day.worked_on == Date.current && day.started_at.nil? %>
               <%= button_to "出社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
             <% end %>
           </td>
@@ -165,7 +204,7 @@
             <% end %>
           </td>
           <td>
-            <% if day.worked_on == Date.today && day.started_at.present? && day.finished_at.nil? %>
+            <% if day.worked_on == Date.current && day.started_at.present? && day.finished_at.nil? %>
               <%= button_to "退社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
             <% end %>
           </td>
@@ -206,11 +245,11 @@
             <!-- 指示者確認㊞の元文字作成-->
             <% zangyo_aprvl_status_l = @zangyo_shinsei_data.zangyo_aprvl_status %>
             <% if zangyo_aprvl_status_l == "申請中" %>
-            <%   zangyo_status_msg = "残業申請中" %>
+            <%   zangyo_status_msg = "残業申請【申請中】" %>
             <% elsif zangyo_aprvl_status_l == "否認" %>
-            <%   zangyo_status_msg = "残業否認" %>
+            <%   zangyo_status_msg = "残業申請【否認】" %>
             <% elsif zangyo_aprvl_status_l == "承認" %>
-            <%   zangyo_status_msg = "残業承認済" %>
+            <%   zangyo_status_msg = "残業申請【承認済】" %>
             <% else %>
             <%   zangyo_status_msg = "" %>
             <% end%>
@@ -223,11 +262,11 @@
             <!-- 指示者確認㊞の元文字作成-->
             <% change_aprvl_status_l = @editaprvl_shinsei_data.change_aprvl_status %>
             <% if change_aprvl_status_l == "申請中" %>
-            <%   change_status_msg = "勤怠編集申請中" %>
+            <%   change_status_msg = "勤怠編集【申請中】" %>
             <% elsif change_aprvl_status_l == "否認" %>
-            <%   change_status_msg = "勤怠編集否認" %>
+            <%   change_status_msg = "勤怠編集【否認】" %>
             <% elsif change_aprvl_status_l == "承認" %>
-            <%   change_status_msg = "勤怠編集承認済" %>
+            <%   change_status_msg = "勤怠編集【承認済】" %>
             <% else %>
             <%   change_status_msg = "" %>
             <% end%>
@@ -266,7 +305,6 @@
         <td></td>
         <td>
           <div>所属長承認　<%= @apr_status_msg %><div>
-          <%#= form_for @user do |f| %>
           <%= form_for(@user, url: month_shinsei_path(params: {id: @user.id, first_day: @first_day}), method: :patch) do |f| %>
             <div class = 'select-shonin'>
               <%= f.select :name, User.where(superior: true).where.not(id: @user.id).map{|o| [o.name, o.id]}, :include_blank => true %>

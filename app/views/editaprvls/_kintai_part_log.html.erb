@@ -24,33 +24,27 @@
       <!-- 日付 -->
       <td><%= kyoten.change_kintai_req_on %></td>
       <!-- 変更前出社時間-->
-      <%# @attend_data = "" %>
-      <%# @attend_data = Attendance.find_by(user_id: kyoten.user_id, worked_on: kyoten.change_kintai_req_on) %>
       <td>
         <% if kyoten.change_first_started_at.present? %>
-          <%= kyoten.change_first_started_at.strftime("%Y-%m-%d %H:%M") %>
-        <%# else %>
-          <%#= @attend_data.started_at.strftime("%Y-%m-%d %H:%M") if @attend_data.present? %>
+          <%= kyoten.change_first_started_at.strftime("%H:%M") %>
         <% end %>
       </td>
       <!-- 変更前退社時間-->
       <td>
         <% if kyoten.change_first_finished_at.present? %>
-          <%= kyoten.change_first_finished_at.strftime("%Y-%m-%d %H:%M") %>
-        <%# else %>
-          <%#= @attend_data.finished_at.strftime("%Y-%m-%d %H:%M") if @attend_data.present? %>
+          <%= kyoten.change_first_finished_at.strftime("%H:%M") %>
         <% end %>
       </td>
       <!-- 変更後出社時間-->
-      <td><%= kyoten.change_started_at.strftime("%Y-%m-%d %H:%M") if kyoten.change_started_at.present? %></td>
+      <td><%= kyoten.change_started_at.strftime("%H:%M") if kyoten.change_started_at.present? %></td>
       <!-- 変更後退社時間-->
-      <td><%= kyoten.change_finished_at.strftime("%Y-%m-%d %H:%M") if kyoten.change_finished_at.present? %></td>
+      <td><%= kyoten.change_finished_at.strftime("%H:%M") if kyoten.change_finished_at.present? %></td>
       <!-- 指示者-->
       <% @user_name = "" %>
       <% @user_name = User.find(kyoten.change_target_person_id) if kyoten.change_target_person_id.present? %>
       <td><%= @user_name.name if @user_name.present? %></td>
       <!-- 承認日 -->
-      <td><%= kyoten.approval_at.strftime("%Y-%m-%d %H:%M") %></td>
+      <td><%= kyoten.approval_at.strftime("%Y-%m-%d") %></td>
     </tr>
     <% end %>
   </tbody>

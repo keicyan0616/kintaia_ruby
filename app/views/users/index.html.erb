@@ -14,26 +14,10 @@
   <h1>ユーザ一覧</h1>
 <% end %>
 
-<!--
-<form  action="">
--->
-  <!--ファイルを選択
-  <input id="filename" readonly type="text" value="" ><button type="button" id="select_file_button">選択</button> -->
-<!--  <input id="file_button" type="file" /> -->
-  <!-- <input type="submit" name="commit" value="プロフィール編集を完了する" /></div>-->
-<!--</form>
-
-<div class = "btn-csv-upload">
-  <%#= link_to "CSVをインポート", "#", class: "btn btn-primary" %>
-</div>
--->
-
 <p></p>
 <div>
-  <%#= form_tag import_csv_path, method: :post, multipart: true do |f| %>
   <%= form_tag import_users_path, multipart: true do %>
     <div class="search_item">
-      <%#= file_field_tag 'csv_file', id: "file_input", onchange: "file_selected($(this));" %>
       <%= file_field_tag :file %>
     </div>
     <p></p>
@@ -42,15 +26,6 @@
     </div>
   <% end %>
 </div>
-
-<!--
-<script type="text/javascript">
-  function file_selected(file_field){
-    var filename = $(file_field)[0].files[0].name;
-    $("#filename").val(filename);
-  }
-</script>
--->
 
 <p></p>
 
@@ -62,32 +37,3 @@
 </ul>
 
 <%= will_paginate %>
-
-<!--
-<%#= form_for(hogehoge) do |f| %>
-  <div>
-    <%#= f.label :file %>
-    <%#= f.file_field :file, id: 'elmFile', onchange: 'selectFile()' %>
-  </div>
-
-  <div>
-    <%#= f.submit 'アップロード', id: 'btnUPload', disabled: true %>
-  </div>
-<#% end %>
-
-<div class="user-search-name">
-<p>ユーザー名検索</p>
-</div>
-<%#= form_tag(users_path, :method => 'get' ) do %>
-  <%#= submit_tag '検索', :name => nil, class: "btn btn-primary btn-search" %>
-  <%#= text_field_tag :search, '', placeholder: "キーワードを入力...", class: "form-control txt-search" %>
-<%# end %>
-
-<%#= will_paginate %>
-
-<ul class="users">
-  <%#= render @users %>
-</ul>
-
-<%#= will_paginate %>
--->

@@ -11,52 +11,39 @@
 <h1>勤怠ログ</h1>
 
 <div>
-  <table class = "table-bordered table-condensed"> <!--table-striped-->
-     <%#= link_to "リセット", reset, method: :post,  class: "btn btn-primary" %>
-     
-<!-------------------------------------------------------------------------->
+  <table class = "table-bordered table-condensed">
 
   <div class="kintailog_contents">
-
     <tbody>
       <%= form_tag editaprvls_part_log_path, method: :get, remote: true do %>
         <div>      
           <button type="reset" value="リセット", class="btn btn-primary btn-reset-log", id="reset">リセット</button>
         </div>
         
-        <% @year_no = Date.today.strftime("%y") %>
+        <% @year_no = Date.current.strftime("%y") %>
         <div>
           年：
           <%= select_tag('year_search', options_for_select([['2018','1'], ['2019','2'], ['2020','3'], ['2021','4'], ['2022','5']], \
               :selected => "#{@year_no.to_i - 17}"), {:onChange => "changeMajor()", class: 'select-year'}) %>
         </div>
-        <%#= select_tag('year_search', options_for_select([['2019','1'], ['2020','2'], ['2021','3'], ['2022','4']]), {:onChange => "javascript: this.form.changeMajor()" }) %>
         
-        <% @month_no = Date.today.strftime("%m") %>
+        <% @month_no = Date.current.strftime("%m") %>
         <div>
           月：
           <%= select_tag('month_search', options_for_select([['01','1'], ['02','2'], ['03','3'], ['04','4'], ['05','5'], ['06','6'], \
               ['07','7'], ['08','8'], ['09','9'], ['10','10'], ['11','11'], ['12','12']] ,:selected => "#{@month_no}"), {:onChange => "changeMajor()", class: 'select-month' }) %>
         </div>  
-        <%#= select_tag :color, options_for_select(["Red", "Green", "Blue"], selected_color), class: "select-drop" %>
       <% end %>
     </tbody>
 
-    <div id="classList" style="display: inline;">
-      <%# if @show_flag == true %>
-        <%#= render :partial => 'kintai_part_log' %>
-        <%#= render :partial => 'kintai_part_log', :locals => { :show_flag => @show_flag } %>
-      <%# end %>
-      <%#= render :partial => 'classList_body' %>
-    </div>  
-  
+    <div id="classList" style="display: inline;"></div>  
   </div>
 
   </table>
 </div>
 
 <script>
-  //onChangeイベント発生時
+  //イベント発生時
   function changeMajor(){
     //alert('アラートのメッセージ');
     var year_select = document.getElementById('year_search');
@@ -65,9 +52,7 @@
     var month_options = document.getElementById('month_search').options;
     var year_value = year_options.item(year_select.selectedIndex).value;
     var month_value = month_options.item(month_select.selectedIndex).value;
-    //var universityID = <%#= @student.universities.first.id %>;
-    //alert(value);
- 
+
     $.ajax({
       url: "/editaprvls/kintai_part_class",
       type: "POST",
@@ -80,14 +65,15 @@
     document.getElementById("year_search").selectedIndex = <%= @year_no.to_i - 18 %>;
     document.getElementById("month_search").selectedIndex = <%= @month_no.to_i - 1 %>;
     changeMajor();
-    //alert(<%#= @year_no %>);
   };
 
   //勤怠ログページ表示時
   document.addEventListener('turbolinks:load', function() {
     changeMajor();
   });
-  
+</script>
+
+<!--
 //  window.addEventListener('load', function(){
 //    console.log('これとか')
 //})
@@ -98,242 +84,4 @@
 
 //$(document).on 'turbolinks:load', ->
 //  alert('ページの読み込みが完了したよ！');
-
-//window.onload = changeMajor;
-</script>
-
-  <!--<tbody>-->
-      <%#= select_tag('year_search', options_for_select([['2019','1'], ['2020','2'], ['2021','3'], ['2022','4']]), {:onChange => "javascript: this.form.getLogResult()" }) %>
-      
-      <!--<script>-->
-      <!--  alert('アラートのメッセージ');-->
-      <!--</script>-->
-      <%#= collection_select(:major, :id, @majors, :id, :name,  {:prompt => "Please select your major"},{:onchange => "changeMajor()" }) %>
-      <%#= form_tag({:controller => 'Editaprvls', :action => 'call_ajax'}, :remote => true, :class => 'form-ajax') do -%>
-      <%#= form_tag({}, :remote => true, :class => 'form-ajax') do %>
-        <%#= select_tag('item1',
-                 options_for_select([['x','1'],['y','2'],['z','3']]), 
-                 :onchange => 'change_item()') %>
-        <%#= select_tag('item2',options_for_select([['w','4']])) %>
-      <%# end %>
-      
-      <%#= form_tag do %>
-        <%#= select_tag(:selected_value, options_for_select(['aaa', 'bbb', 'ccc'], class: 'select_action') %>
-      <%# end %>
-      
-      <%#= form_tag classes_path, method: :get do %>
-        <%#= select_tag 'classes', options_for_select(class_choices, @class_id), id: 'classes' %>
-      <%# end %>
-
-      <%# @students.each do |student| %>
-        <%#= student.name %>
-      <%# end %>
-
-      <!--<script>
-        this.class_names.select();
-      </script>-->
-      
-      
-      
-      <%# @log_data.each do |kyoten| %>
-        <%#= form_for(@user, url: editaprvls_log_path(params[:id]), method: :get) do |f| %>
-          <!--<div class = 'select-shonin'>-->
-            <%#= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, {:include_blank => true}, :onChange => "javascript: this.form.apply_button_name.click();"} %>
-            <%#= f.select :item_id, choices, {}, {:onchange => "alert('change')"} %>
-          <!--</div>-->
-          <%#= f.submit "申請", class: "btn btn-primary btn-shinsei" %>
-        <%# end %>
-
-<!--        <tr>-->
-<!--          <td>-->
-            <!-- <div class="panel-heading"> -->
-              <!-- <div class="panel panel-default collaps"> -->
-<!--                <a href="#link<%#= kyoten.id %>" data-toggle="collapse" class="btn btn-primary ">修正</a>-->
-              <!-- </div> -->
-            <!-- </div> -->
-<!--          </td>-->
-<!--          <td>-->
-<!--            <div class = "btn-delete">-->
-<!--              <%#= link_to "削除", kyoten, method: :delete, data: { confirm: "削除してよろしいですか?"}, class: "btn btn-primary" %>-->
-<!--            </div>-->
-<!--          </td>-->
-<!--          <td><%#= kyoten.id %></td>-->
-<!--          <td><%#= kyoten.kyoten_name %></td>-->
-<!--          <td><%#= kyoten.kyoten_shurui %></td>-->
-<!--        </tr>-->
-      <%# end %>
-  <!--</tbody>-->
-
-<!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
-jQuery(document).bind('ready ajaxComplete', function() {
-  $('.select-drop').change(function() {
-      $alert('アラートのメッセージ');
-      $(this).parent().submit();
-    });
-});
-
-
-function changeMajor(){
-     alert('アラートのメッセージ');
-     //return 'a'
-     //console.log('メッセージがないよー！');
-     
-    //const elem = 'aaa';
-    //if(elem) { // または elem === null で比較
-    //  console.log('発見！', elem);
-    //} else {
-    //  console.error('見つからない');
-    //}
-     //var select = document.getElementById('major_id');
-     //var options =  document.getElementById('major_id').options;
-     //var value = options.item(select.selectedIndex).value;
-     //var universityID = <%#= @student.universities.first.id %>;
- 
-     //$.ajax({
-     //      url: "/students/listEachClass",
-     //     type: "POST",
-     //      data: 'id=<%#= @user.id %>&majorID=' + value + '&universityID=' + universityID
-     //})
-};
-</script>
---!>
-
-        <!--<%#= javascript_include_tag(:application) %>-->
-        <!--<script>-->
-        <!-- //プルダウンメニューが選択されたときに呼び出される関数 -->
-        <!--function change_item() {-->
-          <%#= link_to "", reset, method: :post %>
-          <%#= link_to '', new_user_reservation_url(@user, :started_at => l(time,format: :shorttime),:week_day => week_day),remote:true %>
-          <%#= remote_function(:url => {:action => 'call_ajax'}, 
-                              :with => "'id=' + $('item1').value") %>
-        <!--  $('item2').length = 0;-->
-        <!--}-->
-
-        <!-- //プルダウンメニューの選択肢を削除する関数 -->
-        <!--function clear_item() {-->
-        <!--  $('item2').length = 0;-->
-        <!--}-->
-
-        <!-- //ブルダウンメニューに選択肢を追加する関数 -->
-        <!--function update_menu(name, value) {-->
-        <!--  $('item2').options[$('item2').options.length] = new Option(name, value);-->
-        <!--}-->
-        <!--</script>-->
-        
-<!--  <br>  -->
-
-<!--  <%# @kyoten.each do |kyoten| %>       -->
-<!--    <div id= "link<%#= kyoten.id %>" class="collapse">-->
-<!--      <%# @kyoten_new = Baseplace.find(kyoten.id) %>-->
-<!--      <%#= form_for(@kyoten_new, url: update_baseplace_path(kyoten.id)) do |f| %>-->
-        <%#= render 'shared/error_messages', object: @user %>
-        
-<!--        <%#= f.label :【拠点番号： %>-->
-<!--        <%#= kyoten.id %>-->
-<!--        <%#= f.label :】 %>-->
-<!--        <br>-->
-        <!-- <br> -->
-        
-        <%#= f.label :拠点番号 %>
-        <%#= f.text_field :id, class: 'form-control' %>
-        
-<!--        <%#= f.label :拠点名 %>-->
-<!--        <%#= f.text_field :kyoten_name, class: 'form-control' %>-->
-
-<!--        <%#= f.label :勤怠種類 %>-->
-<!--        <%#= f.text_field :kyoten_shurui, class: 'form-control' %>-->
-<!--        <br>-->
-<!--        <%#= f.submit "修正する", class: "btn btn-primary btn-do-edit" %>-->
-<!--      <%# end %> -->
-<!--    </div>-->
-<!--    <br>-->
-<!--  <%# end %>-->
-
-  <!-- 拠点情報追加ボタン処理 -->
-<!--  <div class="panel-heading">-->
-<!--    <div class="panel panel-default collaps">-->
-      <!-- <a href="#link2" data-toggle="collapse" class="btn btn-primary btn-edit2">拠点情報追加</a> -->
-<!--      <%#= link_to "拠点情報追加", kyoten_add_path, remote: true, class: "btn btn-primary btn-edit2" %>-->
-<!--    </div>-->
-<!--  </div>-->
-
-<!--</div> -->
-
-<!--モーダルウインドウ表示-->
-<!--<div id="kyoten-add" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>-->
-
-<!--<script language="javascript" type="text/javascript">-->
-<!--$(function(){-->
-<!--    var month = $("#month_search").val();-->
-<!--    var year = $("#year_search").val();-->
-<!--    var id = 2-->
-<!--    var default_year = 2019-->
-<!--    var default_month = 10-->
-<!--    var users_json = $("#user_array").val();-->
-<!--    var users = JSON.parse(users_json);-->
-  
-<!--    function getNowYMD(aaa){-->
-<!--      var dt = new Date(aaa);-->
-<!--      var y = dt.getFullYear();-->
-<!--      var m = ("00" + (dt.getMonth()+1)).slice(-2);-->
-<!--      var d = ("00" + dt.getDate()).slice(-2);-->
-<!--      var result = y + "-" + m + "-" + d;-->
-<!--      return result;-->
-<!--    }-->
-    
-<!--    function getNowHM(aaa){-->
-<!--      var dt = new Date(aaa);-->
-<!--      var H = ("00" + (dt.getHours())).slice(-2);-->
-<!--      var M = ("00" + (dt.getMinutes())).slice(-2);-->
-<!--      var result = H + ":" + M ;-->
-<!--      return result;-->
-<!--    }-->
-    
-<!--    function getLogResult(){-->
-<!--       alert('アラートのメッセージ');-->
-<!--       // value値取得 -->
-<!--        var month = $("#month_search").val();-->
-<!--        var year = $("#year_search").val();-->
-<!--        // ajax -->
-<!--        $.ajax({-->
-<!--            type: 'GET',-->
-<!--            dataType: 'json',-->
-<!--            url: `/ajax/${id}`,-->
-<!--            data: {-->
-<!--                month: month,-->
-<!--                year: year,-->
-<!--            },-->
-<!--        })-->
-<!--            .done(function (data) {-->
-<!--               $("#tbody").empty();-->
-<!--               if(data){-->
-<!--                   $.each(data, function(id, name){-->
-<!--                       $("#tbody").append(`<tr>\-->
-<!--                                               <td>${ getNowYMD(name.year+"-"+ name.month+"-"+name.day)}</td>\-->
-<!--                                               <td>${ name.arrival_time? getNowHM(name.arrival_time): ""}</td>\-->
-<!--                                               <td>${ name.leaving_time? getNowHM(name.leaving_time): ""}</td>\-->
-<!--                                               <td>${ getNowHM(name.arrival_change_time)}</td>\-->
-<!--                                               <td>${ getNowHM(name.leaving_change_time)}</td>\-->
-<!--                                               <td>${ users[id] }</td>\-->
-<!--                                            </tr>\-->
-<!--                                           `)-->
-<!--                   });-->
-<!--               }-->
-<!--            });-->
-<!--    }-->
-
-<!--    $("#search_reset").click(function () {-->
-<!--        $("#year_search").val(default_year);-->
-<!--        $("#month_search").val(default_month);-->
-<!--         getLogResult();-->
-<!--    });-->
-
-<!--    // ラジオボタンを選択変更したら実行　-->
-<!--    $("#month_search").change(function () {-->
-<!--       getLogResult();-->
-<!--    });-->
-<!--     $("#year_search").change(function () {-->
-<!--       alert('アラートのメッセージ');-->
-<!--       getLogResult();-->
-<!--    });-->
-<!--});-->
+-->

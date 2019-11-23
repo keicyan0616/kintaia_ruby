@@ -44,12 +44,14 @@
             <tr>
               <td><%= @slct_day.strftime("%m/%d") %><%#= day.worked_on.to_s(:date) %></td>
               <td class = "<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[@slct_day.wday] %></td>
-              <td><%= af.time_field :zangyo_finished_at, class: "form-control" %></td>
+              <!-- <td><%#= af.time_field :zangyo_finished_at, class: "form-control" %></td> -->
+              <td><%= af.time_select :zangyo_finished_at, {:minute_step => 15}, {:class => "form-control bootstrap-date"} %></td>
               <td><%= check_box_tag :"yokujitsu_kakunin" %></td>
-              <td><%= af.text_field :zangyo_note, class: "form-control" %><!-- <input type = "text" name = "zangyo_note" class = "select-zangyo-shonin2">--></td>
+              <td><%= af.text_field :zangyo_note, class: "form-control bootstrap-date" %><!-- <input type = "text" name = "zangyo_note" class = "select-zangyo-shonin2">--></td>
               <td>
                 <div class = 'select-zangyo-shonin'>
-                  <%= f.select :name, User.where(superior: true).where.not(id: @user.id).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => @shonin_id_show}, {class: "select-zangyo-shonin2"} %>
+                  <%= f.select :name, User.where(superior: true).where.not(id: @user.id).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => @shonin_id_show}, \
+                      {class: "select-zangyo-shonin2 bootstrap-date"} %>
                 </div>
               </td>
             </tr>
@@ -84,22 +86,3 @@
     </div>
   </div>
 </div>
-
-              <!--<td class="<%#= css_class %>"><%#= %w{日 月 火 水 木 金 土}[day.worked_on.wday] %></td>
-              
-              <!--時間入力不可制御フラグの設定
-              <%# if day.worked_on > Date.today %>
-                <%# readOnlyFlg = true %>
-              <%# else %>
-                <%# readOnlyFlg = false %>
-              <%# end %>
-              
-              <td><%#= af.time_field :started_at, class: "form-control", readonly: readOnlyFlg %></td>
-              <td><%#= af.time_field :finished_at, class: "form-control", readonly: readOnlyFlg %></td>
-              <td>
-                <%# if day.started_at.present? && day.finished_at.present? %>
-                  <%#= working_times(day.started_at, day.finished_at) %>
-                <%# end %>
-              </td>
-              <td><%#= af.text_field :note, class: "form-control", readonly: readOnlyFlg %></td>
-              -->

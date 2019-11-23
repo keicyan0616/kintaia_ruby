@@ -1,7 +1,7 @@
 # coding: utf-8
 
 User.create!(name:  "上長A",
-             email: "superior-a@example.com",
+             email: "superior1@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: false,
@@ -14,7 +14,7 @@ User.create!(name:  "上長A",
              uid: "xy98n001")
 
 User.create!(name:  "上長B",
-             email: "superior-b@example.com",
+             email: "superior2@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: false,
@@ -27,7 +27,7 @@ User.create!(name:  "上長B",
              uid: "xy98n002")
 
 User.create!(name:  "上長C",
-             email: "superior-c@example.com",
+             email: "superior3@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: false,
@@ -40,7 +40,7 @@ User.create!(name:  "上長C",
              uid: "xy98n003")
 
 User.create!(name:  "一般ユーザーA",
-             email: "ippan-a@example.com",
+             email: "person1@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: false,
@@ -53,7 +53,7 @@ User.create!(name:  "一般ユーザーA",
              uid: "xy99n001")
 
 User.create!(name:  "一般ユーザーB",
-             email: "ippan-b@example.com",
+             email: "person2@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: false,
@@ -66,7 +66,7 @@ User.create!(name:  "一般ユーザーB",
              uid: "xy99n002")
 
 User.create!(name:  "一般ユーザーC",
-             email: "ippan-c@example.com",
+             email: "person3@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: false,
@@ -79,7 +79,7 @@ User.create!(name:  "一般ユーザーC",
              uid: "xy99n003")
 
 User.create!(name:  "管理者A",
-             email: "kanri-a@example.com",
+             email: "admin1@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: true,
@@ -92,7 +92,7 @@ User.create!(name:  "管理者A",
              uid: "xy00n001")
 
 User.create!(name:  "管理者B",
-             email: "kanri-b@example.com",
+             email: "admin2@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: true,
@@ -105,7 +105,7 @@ User.create!(name:  "管理者B",
              uid: "xy00n002")
 
 User.create!(name:  "管理者C",
-             email: "kanri-c@example.com",
+             email: "admin3@example.com",
              password:              "password",
              #password_confirmation: "password",
              admin: true,

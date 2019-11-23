@@ -12,7 +12,6 @@
 
 <div>
   <table class = "table-bordered table-striped table-condensed">
-    <!-- <thead> -->
     <tr>
       <th></th>
       <th></th>
@@ -20,37 +19,29 @@
       <th>拠点名</th>
       <th>勤怠種類</th>
     </tr>
-    <!-- </thead> -->
 
-    <!-- <tbody> -->
-      <% @kyoten.each do |kyoten| %>  
-        <tr>
-          <td>
-            <!--<div class="panel-heading">
-              <div class="panel panel-default collaps">-->
-                <!-- <a href="#link<%#= kyoten.id %>" data-toggle="collapse" class="btn btn-primary ">修正</a> -->
-                <%= link_to "修正", kyoten_edit_path(kyoten.kyoten_id), remote: true, class: "btn btn-primary" %>
-              <!--</div>
-            </div>-->
-          </td>
-          <td>
-            <div class = "btn-delete">
-              <%= link_to "削除", kyoten, method: :delete, data: {confirm: "削除してよろしいですか?"}, class: "btn btn-primary" %>
-            </div>
-          </td>
-          <td><%= kyoten.kyoten_id %></td>
-          <td><%= kyoten.kyoten_name %></td>
-          <td><%= kyoten.kyoten_shurui %></td>
-        </tr>
-      <% end %>
-    <!-- </tbody> -->
+    <% @kyoten.each do |kyoten| %>  
+      <tr>
+        <td>
+          <%= link_to "修正", kyoten_edit_path(kyoten.kyoten_id), remote: true, class: "btn btn-primary" %>
+        </td>
+        <td>
+          <div class = "btn-delete">
+            <%= link_to "削除", kyoten, method: :delete, data: {confirm: "削除してよろしいですか?"}, class: "btn btn-primary" %>
+          </div>
+        </td>
+        <td><%= kyoten.kyoten_id %></td>
+        <td><%= kyoten.kyoten_name %></td>
+        <td><%= kyoten.kyoten_shurui %></td>
+      </tr>
+    <% end %>
   </table>
   <br>  
 
   <!-- 拠点情報追加ボタン処理 -->
   <div class="panel-heading">
     <div class="panel panel-default collaps">
-      <%#= link_to "拠点情報追加", kyoten_add_path, remote: true, class: "btn btn-primary btn-edit2" %>
+
       <a href="#link" data-toggle="collapse" class="btn btn-primary btn-edit2">拠点情報追加</a>
       
         <div id= "link" class="collapse kyoten-acordion">

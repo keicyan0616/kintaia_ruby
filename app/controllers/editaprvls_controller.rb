@@ -1,5 +1,6 @@
 class EditaprvlsController < ApplicationController
-  #before_action :correct_or_admin_user,   only: [:edit]
+  before_action :logged_in_user, only: [:edit, :update]
+  before_action :correct_user,   only: [:edit, :update, :editaprvl_shinsei, :soushin_henko_shinsei, :kintai_log]
 
 #   def create
 #     @user = User.find(params[:user_id])
@@ -83,6 +84,9 @@ class EditaprvlsController < ApplicationController
           and editaprvl.change_kintai_req_on < Date.tomorrow then
         @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
         @error_hnt = "FINISH_NG"
+      elsif @shonin_id == "" and editaprvl.approval_at != nil
+        @edit_kintai_req_on = editaprvl.change_kintai_req_on.strftime("%Y-%m-%d") if @edit_kintai_req_on == ""
+        @error_hnt = "SHONIN_SELECT_NG"
       end
       
       # else
@@ -139,6 +143,8 @@ class EditaprvlsController < ApplicationController
         flash[:danger] = "「#{@edit_kintai_req_on}」の退社時間を入力してください。"
       elsif @error_hnt == "ZENGO_NG"
         flash[:danger] = "「#{@edit_kintai_req_on}」の退社が出社より早い時間です。"
+      elsif @error_hnt == "SHONIN_SELECT_NG"
+        flash[:danger] = "「#{@edit_kintai_req_on}」の指示確認㊞欄を選択してください。"
       else
         flash[:danger] = "不正な時間入力がありました、再入力してください。"
       end
@@ -207,7 +213,7 @@ class EditaprvlsController < ApplicationController
     @id = params[:id]
     @year_value = params[:year_search]
     #@log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "#{Date.today.strftime("%Y-%m")}-01".."#{Date.today.strftime("%Y-%m")}-30")
-    @log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "#{Date.today.strftime("%Y-%m")}-01".."#{Date.today.end_of_month}").order(change_kintai_req_on: :asc)
+    @log_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "#{Date.current.strftime("%Y-%m")}-01".."#{Date.current.end_of_month}").order(change_kintai_req_on: :asc)
     #@show_flag = true
   end
   
@@ -239,6 +245,22 @@ private
   def editaprvls_params
     params.permit(editaprvls: [:change_kintai_req_on, :change_started_at, :change_finished_at, :note, :user_id])[:editaprvls]
   end
+  
+  # beforeアクション
+    # ログイン済みユーザーか確認
+    def logged_in_user
+      unless logged_in?
+        store_location
+        flash[:danger] = "ログインしてください。"
+        redirect_to login_url
+      end
+    end
+
+    # 正しいユーザーかどうか確認
+    def correct_user
+      @user = User.find(params[:id])
+      redirect_to(root_url) unless current_user?(@user)
+    end
   
 end
   # def call_ajax
@@ -372,43 +394,6 @@ end
 #     @first_day_l = Date.strptime(params[:date]).beginning_of_month
 #     redirect_to user_path(@user, params:{first_day: @first_day_l})
 #   end
-
-#   # ### 3．出勤中社員一覧関係 ######
-#   def shukkin_list
-#     @users = User.all
-#     @shukkin_users = []
-
-#     @users.each do |user| 
-#       if @attendances = user.attendances.find_by(worked_on: Date.today, finished_at: nil)
-#         @shukkin_users.push(user) if @attendances.started_at.present?
-#         #debugger
-#       end
-#     end
-#   end
-
-#   # ### CSV出力ボタン押下時 #####
-#   def export
-#     logger.debug "ここを通ったよ(015)"
-#     @user = User.find(params[:id])
-#     @first_day = first_day(params[:date])
-#     @last_day = @first_day.end_of_month
-#     @attendances = @user.attendances.where("worked_on >= ?", @first_day).where("worked_on <= ?", @last_day)
-
-#     respond_to do |format|
-#       format.csv do
-#         send_data render_to_string, filename: "hoge.csv", type: :csv
-#       end
-#     end
-#   end
-
-#     def attendances_zangyo_params
-#       #params.permit(attendances: [:finished_plan_at, :gyomu_memo])[:attendances]
-#       params.permit(attendances: [:finished_at])[:attendances]
-#     end
-
-#     def zangyoaprvl_params
-#       params.permit(zangyoaprvls: [:zangyo_finished_at, :zangyo_note])[:zangyoaprvls]
-#     end
 
 #     # 正しいユーザー、または、管理者ユーザーかどうか確認
 #     def correct_or_admin_user

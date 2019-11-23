@@ -179,18 +179,41 @@ input, textarea, select, .uneditable-input {
 /* 所属長承認申請のお知らせ*/
 .shozoku-info{
   font-size: 120%;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  margin: auto;
 }
 .link-shozoku{
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 /* 勤怠変更申請のお知らせ*/
 .kintai-info{
   font-size: 120%;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  margin: auto;
 }
+
 /* 残業申請のお知らせ*/
 .zangyou-info{
   font-size: 120%;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  margin: auto;
+}
+
+.shinsei-cnt{
+  font-size: 120%;
+  width: 200px;
+  height: 28px;
+  padding-top: 0px;
+  padding-left: 10px;
+  margin-top: 3px;
+  margin-left: 235px;
 }
 
 /* ### ユーザー一覧画面 ### */

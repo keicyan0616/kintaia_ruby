@@ -13,6 +13,9 @@ class User < ApplicationRecord
   has_secure_password
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
   validates :affiliation, length: { in: 3..50 }, allow_blank: true
+  validates :employer_number, length: { maximum: 4 }, uniqueness: true, numericality: true, allow_blank: true
+  validates :uid, length: { maximum: 10 }, uniqueness: true, allow_blank: true
+  
   
   def self.search(search)
     return User.all unless search

@@ -1,5 +1,6 @@
 class BaseplacesController < ApplicationController
-  
+  before_action :admin_user, only: [:kyoten_list, :kyoten_edit, :destroy, :update, :touroku]
+
   def kyoten_list
     @kyoten = Baseplace.all
     @kyoten_new = Baseplace.new
@@ -36,13 +37,20 @@ class BaseplacesController < ApplicationController
     @kyoten_name = params[:baseplace][:kyoten_name] 
     @kyoten_shurui = params[:baseplace][:kyoten_shurui] 
     kyoten_data = Baseplace.new(kyoten_id: @kyoten_id, kyoten_name: @kyoten_name, kyoten_shurui: @kyoten_shurui)
-    kyoten_data.save
-    flash[:success] = "拠点情報を登録しました。"
+    if kyoten_data.save
+      flash[:success] = "拠点情報を登録しました。"
+    else
+      flash[:danger] = "拠点情報を登録できませんでした。"
+    end
     redirect_to kyoten_list_path
   end
 private
 
   def baseplace_params
     params.require(:baseplace).permit(:kyoten_id, :kyoten_name, :kyoten_shurui)
+  end
+  
+  def admin_user
+    redirect_to(root_url) unless current_user.admin?
   end
 end
