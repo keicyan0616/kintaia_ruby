@@ -7,7 +7,6 @@ Rails.application.routes.draw do
   
   # 上長勤怠申請関係
   get '/users/:id/superior_shinsei', to: 'users#kintai_shinsei', as: :shinsei_kintai
-  #get '/users/:id/superior_shinsei', to: 'users#kintai_shinsei', as: :approval
   patch '/users/:id/soushin_kintai', to: 'users#soushin_kintai', as: :soushin_kintai
   patch '/users/:id/month_shinsei', to: 'users#month_shinsei', as: :month_shinsei
   get '/users/:id/:date/kintai_kakunin', to: 'users#kintai_kakunin'
@@ -24,9 +23,7 @@ Rails.application.routes.draw do
   
   # 勤怠編集画面
   get 'users/:id/editaprvls/:date/edit', to: 'editaprvls#edit', as: :edit_editaprvls
-  #get 'users/:id/attendances/:date/edit', to: 'attendances#edit', as: :edit_attendances
   patch 'users/:id/editaprvls/:date/update', to: 'editaprvls#update', as: :update_editaprvls
-  #patch 'users/:id/attendances/:date/update', to: 'attendances#update', as: :update_attendances
   get '/users/:id/editaprvl_shinsei', to: 'editaprvls#editaprvl_shinsei', as: :henko_shinsei_approval  #勤怠変更申請承認画面表示(モーダル表示)
   patch '/users/:id/soushin_henko_shinsei', to: 'editaprvls#soushin_henko_shinsei', as: :soushin_henko_shinsei
   get 'users/:id/editaprvls_log', to: 'editaprvls#kintai_log', as: :editaprvls_log
@@ -42,9 +39,7 @@ Rails.application.routes.draw do
   delete '/basesplaces/:id/delete', to: 'baseplaces#destroy', as: :baseplace
   patch '/basesplaces/:id/update', to: 'baseplaces#update', as: :update_baseplace
   patch '/basesplaces/touroku', to: 'baseplaces#touroku', as: :touroku_baseplace
-  
-  # CSVファイルインポート
-  #post '/import', to: 'users#import_csv', as: :import_csv
+
   # CSVファイルエクスポート
   get 'users/:id/attendances/:date/export', to: 'attendances#export', as: :export_csv
   

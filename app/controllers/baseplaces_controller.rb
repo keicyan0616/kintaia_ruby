@@ -4,24 +4,21 @@ class BaseplacesController < ApplicationController
   def kyoten_list
     @kyoten = Baseplace.all
     @kyoten_new = Baseplace.new
-    #@kyoten_new = Baseplace.find(1)
   end
   
   def kyoten_edit
-    logger.debug "ここを通ったよ(023)"
-    #@kyoten = Baseplace.all
-    #@kyoten_new = Baseplace.new
+    #logger.debug "ここを通ったよ(023)"
   end
   
   def destroy
-    logger.debug "ここを通ったよ(021)"
+    #logger.debug "ここを通ったよ(021)"
     Baseplace.find_by(id: params[:id]).destroy
     flash[:success] = "拠点情報を削除しました。"
     redirect_to kyoten_list_path
   end
 
   def update
-    logger.debug "ここを通ったよ(020)"
+    #logger.debug "ここを通ったよ(020)"
     @kyoten1 = Baseplace.find_by(kyoten_id: params[:id])
     if @kyoten1.update_attributes(baseplace_params)
       flash[:success] = "拠点情報を更新しました。"

@@ -30,7 +30,6 @@
         </tr>
       </thead>
       <tbody>
-        <%# @dates.each do |day| %>
           <% 
             css_class = 
             case %w{日 月 火 水 木 金 土}[@slct_day.wday]
@@ -42,12 +41,11 @@
           %>
           <%= fields_for "zangyoaprvls[]", @zangyoaprvl do |af| %>
             <tr>
-              <td><%= @slct_day.strftime("%m/%d") %><%#= day.worked_on.to_s(:date) %></td>
+              <td><%= @slct_day.strftime("%m/%d") %></td>
               <td class = "<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[@slct_day.wday] %></td>
-              <!-- <td><%#= af.time_field :zangyo_finished_at, class: "form-control" %></td> -->
               <td><%= af.time_select :zangyo_finished_at, {:minute_step => 15}, {:class => "form-control bootstrap-date"} %></td>
               <td><%= check_box_tag :"yokujitsu_kakunin" %></td>
-              <td><%= af.text_field :zangyo_note, class: "form-control bootstrap-date" %><!-- <input type = "text" name = "zangyo_note" class = "select-zangyo-shonin2">--></td>
+              <td><%= af.text_field :zangyo_note, class: "form-control bootstrap-date" %></td>
               <td>
                 <div class = 'select-zangyo-shonin'>
                   <%= f.select :name, User.where(superior: true).where.not(id: @user.id).map{|o| [o.name, o.id]}, {:include_blank => true, :selected => @shonin_id_show}, \
@@ -56,29 +54,11 @@
               </td>
             </tr>
           <% end %>
-          <!-- 
-          <%#= fields_for "attendances[]", @attendance do |af| %>
-            <tr>
-              <td><%#= @slct_day.strftime("%m/%d") %><%#= day.worked_on.to_s(:date) %></td>
-              <td class = "<%#= css_class %>"><%#= %w{日 月 火 水 木 金 土}[@slct_day.wday] %></td>
-              <td><%#= af.time_field :finished_plan_at, class: "form-control" %></td>
-              <td><%#= check_box_tag :"yokujitsu_kakunin" %></td>
-              <td><%#= af.text_field :gyomu_memo, class: "form-control" %><!-- <input type = "text" name = "zangyo_note" class = "select-zangyo-shonin2"></td>
-              <td>
-                <div class = 'select-zangyo-shonin'>
-                  <%#= f.select :name, User.where(superior: true).map{|o| [o.name, o.id]}, {:include_blank => true}, {class: "select-zangyo-shonin2"} %>
-                </div>
-              </td>
-            </tr>
-          <%# end %>
-          -->
-        <%# end %>
       </tbody>
     </table>
     <p></p>
     <div class="btn-attendances-update">
       <%= f.submit "変更を送信する", class: "btn btn-primary" %>
-      <%#= link_to "キャンセル", user_path(@user, params:{first_day: @first_day }), class: "btn btn-default btn-block" %>
     </div>
   <% end %>
 

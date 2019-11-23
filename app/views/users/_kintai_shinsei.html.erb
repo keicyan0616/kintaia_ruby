@@ -41,17 +41,13 @@
                 <% @app_tmp = app_data.id %>
                 <% @app_status = app_data.approval_status %>
                 <%= select_tag "note#{@app_tmp.to_s}", options_for_select(["","申請中", "承認", "否認"], :selected => "#{@app_status}") %>
-                <%#= form_for app_data do |f| %>
-                  <%#= f.select :approval_status, [["なし", "なし"], ["申請中", "申請中"], ["承認", "承認"], ["否認", "否認"]], :prompt => "選択してください", class: "list-shinsei" %>
-                <%# end %>
               </td>
               <td><%= check_box_tag :"shiji_kakunin#{@app_tmp.to_s}" %></td>
               <td><%= link_to "確認", "#{target_person_id_tmp.to_s}/#{app_data.kintai_req_on}/kintai_kakunin" , class: "btn btn-primary" %></td>
-              <!-- <td><%#= link_to "確認", user_path(params: {id: @user.id, first_day: @first_day.prev_month}), class: "btn btn-primary" %></td> -->
             </tr>
           </table>
         <% end %>
-        <div><%= fapr.submit "変更を送信する", class: "btn btn-primary btn-soushin" %><%#= link_to "変更を送信する", soushin_kintai_path(@user), class: "btn btn-primary btn-soushin" %></div>
+        <div><%= fapr.submit "変更を送信する", class: "btn btn-primary btn-soushin" %></div>
         
       <% end %>
       </div>

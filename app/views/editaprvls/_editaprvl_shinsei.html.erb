@@ -21,13 +21,11 @@
         <% target_person_id_tmp = -1 %>
         <% @editaprvls.each do |editaprvl_data| %>
 
-          <%# if target_person_id_tmp != editaprvl_data.change_target_person_id %>
           <% if target_person_id_tmp != editaprvl_data.user_id %>
             <% if target_person_id_tmp != -1 %>
               </table>
             <% end %>
 
-            <%# @target_user = User.find_by(id: editaprvl_data.change_target_person_id) %>
             <% @target_user = User.find_by(id: editaprvl_data.user_id) %>
             <div class = "person_title">【<%= @target_user.name %>からの勤怠変更申請】</div>
             
@@ -61,7 +59,6 @@
               </tr>
           <% end %>
 
-        <%# target_person_id_tmp = editaprvl_data.change_target_person_id %>
         <% target_person_id_tmp = editaprvl_data.user_id %>
           <% 
             css_class = 
@@ -81,16 +78,13 @@
             
             <!-- 変更前 出社(時) -->
             <td>
-              <%# @attendance = Attendance.find_by(user_id: editaprvl_data.change_target_person_id, worked_on: editaprvl_data.change_kintai_req_on) %> <!--editaprvl_data.change_kintai_req_on) %>-->
-              <% @attendance = Attendance.find_by(user_id: editaprvl_data.user_id, worked_on: editaprvl_data.change_kintai_req_on) %> <!--editaprvl_data.change_kintai_req_on) %>-->
+              <% @attendance = Attendance.find_by(user_id: editaprvl_data.user_id, worked_on: editaprvl_data.change_kintai_req_on) %>
               <%= @attendance.started_at.strftime("%H") if @attendance.started_at.present? %> <!--.strftime("%H") %>-->
             </td>
             <!-- 変更前 出社(分) -->
-            <%# @calc_work_datetime = Time.parse(editaprvl_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.designated_work_end_time.strftime("%H:%M") + " +0900") %>
             <td>
               <%= @attendance.started_at.strftime("%M") if @attendance.started_at.present? %>
             </td>
-            <%#= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
               
             <!-- 変更前 退社(時) -->
             <td><%= @attendance.finished_at.strftime("%H") if @attendance.finished_at.present? %></td>
@@ -100,7 +94,6 @@
             </td>
             
             <!-- 変更後 出社(時)　 -->
-            <%# @editaprvl = Editaprvl.find_by(change_target_person_id: editaprvl_data.change_target_person_id, change_kintai_req_on: "2019-09-09") %>
             <td><%= editaprvl_data.change_started_at.strftime("%H") if editaprvl_data.change_started_at.present? %></td>
             <!-- 変更後 出社(分) -->
             <td><%= editaprvl_data.change_started_at.strftime("%M") if editaprvl_data.change_started_at.present? %>

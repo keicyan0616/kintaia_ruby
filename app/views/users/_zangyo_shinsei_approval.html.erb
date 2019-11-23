@@ -70,9 +70,7 @@
             <!-- 時間外時間 -->
             <% @calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.designated_work_end_time.strftime("%H:%M") + " +0900") %>
             <td><%= working_times(@calc_work_datetime, zangyo_data.zangyo_finished_at) %></td>
-              
-            <%#= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
-              
+
             <!-- 業務処理内容 -->
             <td><%= zangyo_data.zangyo_note %></td>
             <!-- 指示者確認㊞ -->
@@ -92,7 +90,7 @@
           </table>
         <% end %>
         
-        <div><%= fapr.submit "変更を送信する", class: "btn btn-primary btn-soushin" %><%#= link_to "変更を送信する", soushin_kintai_path(@user), class: "btn btn-primary btn-soushin" %></div>
+        <div><%= fapr.submit "変更を送信する", class: "btn btn-primary btn-soushin" %></div>
         
       <% end %>
       </div>

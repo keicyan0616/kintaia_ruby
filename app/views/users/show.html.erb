@@ -216,13 +216,10 @@
               <% if @diff_sec < 0 %>
                 <% @diff_sec = 86400 + @diff_sec %>
                 <%= format("%.2f", 24 + working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)).to_f) %>
-                <%#= @calc_working_time = 24.00 + @calc_working_time.to_i %>
-              <% else %>                
-                <%#= working_times(day.started_at, day.finished_at) %>
+              <% else %>
                 <%= working_times(Time.parse(day.started_at.to_s(:hour) + ":" + start_min), Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min)) %>
               <% end %>
-              
-              <%# seconds = (day.finished_at - day.started_at).to_i %>
+
               <% seconds = @diff_sec %>
               <% @total_seconds = @total_seconds.to_i + seconds %>
             <% end %>
@@ -234,14 +231,14 @@
           <% zangyo_status_msg = "" %>
           <% if @zangyo_shinsei_data.present? %>
             <!-- 終了予定時間(時) -->
-            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:hour) if day.finished_plan_at.present? %></td>
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
             <!-- 終了予定時間(分) -->
-            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:min) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:min) if day.finished_plan_at.present? %></td>
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:min) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
             <!-- 時間外時間 -->
             <% @calc_work_datetime = Time.parse(@zangyo_shinsei_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @user.designated_work_end_time.strftime("%H:%M") + " +0900") %>
             <td><%= working_times(@calc_work_datetime, @zangyo_shinsei_data.zangyo_finished_at) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
             <!-- 業務処理内容 -->
-            <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %><%#= day.gyomu_memo %></td>
+            <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %></td>
             <!-- 指示者確認㊞の元文字作成-->
             <% zangyo_aprvl_status_l = @zangyo_shinsei_data.zangyo_aprvl_status %>
             <% if zangyo_aprvl_status_l == "申請中" %>
@@ -295,7 +292,7 @@
     <tfoot>
       <tr>
         <td></td>
-        <td colspan = "2"><%#= format_basic_time(@user.basic_work_time).to_f * @worked_sum %></td>
+        <td colspan = "2"></td>
         <td colspan = "6"></td>
         <td><%= working_times_sum(@total_seconds) unless @total_seconds.nil? %></td>
         <td></td>

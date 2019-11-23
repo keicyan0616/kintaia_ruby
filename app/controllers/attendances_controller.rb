@@ -16,39 +16,13 @@ class AttendancesController < ApplicationController
     end
     redirect_to @user
   end
-  
-  # ### 1．勤怠編集関係 ######
-  # --- 勤怠編集画面 表示 -----
-  # def edit
-  #   @user = User.find(params[:id])
-  #   @first_day = first_day(params[:date])
-  #   @last_day = @first_day.end_of_month
-  #   @dates = user_attendances_month_date
-  # end
-  
-  # 勤怠編集画面 更新送信
-  # def update
-  #   @user = User.find(params[:id])
-  #   if attendances_invalid?
-  #     attendances_params.each do |id, item|
-  #       attendance = Attendance.find(id)
-  #       attendance.update_attributes(item)
-  #     end
-  #     flash[:success] = '勤怠情報を更新しました。'
-  #     redirect_to user_path(@user, params:{first_day: params[:date]})
-  #   else
-  #     flash[:danger] = "不正な時間入力がありました、再入力してください。"
-  #     redirect_to edit_attendances_path(@user, params[:date])
-  #   end
-  # end
-  
+
   # ### 2．残業申請(申請者側)関係 ######
   # 2-1．モーダル表示（残業申請モーダル画面）
   def zangyo_shinsei
-    logger.debug "ここを通ったよ(010)"
+    #logger.debug "ここを通ったよ(010)"
     @user = User.find(params[:id])
     @slct_day = Date.strptime(params[:date]) #.to_s(:date)
-    #@attendance = @user.attendances.find_by(worked_on: params[:date]) #もう不要かも
     
     #更新データの取得(モーダル画面とDBのリンク付け)
     @zangyoaprvl = Zangyoaprvl.find_by(zangyo_aprvl_req_on: params[:date], zangyo_target_person_id: params[:id])
@@ -62,35 +36,25 @@ class AttendancesController < ApplicationController
     if @zangyoaprvl.present? && @zangyoaprvl.yuko_flag == 1
       @shonin_id_show = @zangyoaprvl.user_id
     end
-    #@first_day = first_day(params[:date])
-    #@last_day = @first_day.end_of_month
-    #@attend_date = Attendance.find(1)
-    #@dates = user_attendances_month_date
   end
   
   # 2-2．変更送信（残業申請モーダル画面）
   def zangyo_update
-    logger.debug "ここを通ったよ(011)"
+    #logger.debug "ここを通ったよ(011)"
     
     #各種値を取得
     @user = User.find(params[:id])                                      #残業申請者ID
     @slct_date = params[:date]                                          #残業申請日
     @yokujitsu_kakunin_check = params[:"yokujitsu_kakunin"]             #翌日(チェック)
     @shonin_id = params[:user][:name]                                   #残業承認者ID
-    #@attendance = @user.attendances.find_by(worked_on: params[:date])
-    #if attendances_invalid?
 
     #残業申請日の申請済みデータの取得(有無チェック用)
     @zangyo_apr_count = Zangyoaprvl.where(zangyo_aprvl_req_on: @slct_date).where(zangyo_target_person_id: @user.id).where(zangyo_aprvl_status: "申請中").where(yuko_flag: 1).count
-    #@zangyo_apr_count = Zangyoaprvl.where(zangyo_aprvl_req_on: @slct_date).where(zangyo_target_person_id: @user.id).where.not(zangyo_finished_at: nil).where.not(zangyo_aprvl_status: "承認").where(yuko_flag: 1).count
     
     #残業申請データの登録
     if @zangyo_apr_count > 0
       flash[:danger] = "既に申請済みです。"
     else
-      #承認済みデータの無効化
-      #@zangyo_apr_finished = Zangyoaprvl.where(zangyo_aprvl_req_on: @slct_date).where(zangyo_target_person_id: @user.id).where.not(zangyo_finished_at: nil).where(zangyo_aprvl_status: "承認").where(yuko_flag: 1).count
-      
       zangyoaprvl_params.each do |id, item|
         @gyomu_memo_tmp = params[:zangyoaprvls][id][:zangyo_note]                 #業務処理内容
         @finished_plan_time_tmp = params[:zangyoaprvls][id][:zangyo_finished_at]  #終了予定時間
@@ -105,20 +69,14 @@ class AttendancesController < ApplicationController
           #対象データの取得と更新
           zangyoaprvl = Zangyoaprvl.find(id)
           zangyoaprvl.update_attributes(item)
-          @gyomu_memo = zangyoaprvl.zangyo_note                              #業務処理内容
-          @finished_plan_time = zangyoaprvl.zangyo_finished_at               #終了予定時間
+          @gyomu_memo = zangyoaprvl.zangyo_note                                   #業務処理内容
+          @finished_plan_time = zangyoaprvl.zangyo_finished_at                    #終了予定時間
 
           @finished_plan_at = Time.parse(@slct_date + " " + @finished_plan_time.strftime("%H:%M") + " +0900")
           #残業時間申請日時の翌日設定
           if @yokujitsu_kakunin_check == "1" then
-            #@finished_plan_at = Time.parse(attendance.worked_on.tomorrow.strftime("%Y-%m-%d") + " " + attendance.finished_plan_at.strftime("%H:%M") + " +0900")
             @finished_plan_at = @finished_plan_at.tomorrow
           end
-          #@calc_work_datetime = Time.parse(zangyo_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @target_user.designated_work_end_time.strftime("%H:%M") + " +0900")
-
-          #@zangyo_apr = Zangyoaprvl.new(user_id: @shonin_id, zangyo_aprvl_req_on: @slct_date, zangyo_aprvl_status: "申請中", zangyo_finished_at: @finished_plan_at.to_s, 
-                                        #zangyo_note: @gyomu_memo.to_s, zangyo_target_person_id: @user.id, yuko_flag: 1)
-          #@zangyo_apr.save 
           zangyoaprvl.user_id = @shonin_id
           zangyoaprvl.zangyo_aprvl_req_on = @slct_date
           zangyoaprvl.zangyo_aprvl_status = "申請中"
@@ -132,15 +90,6 @@ class AttendancesController < ApplicationController
       end
     end
     ############################################
-    #zangyo_app_data.zangyo_aprvl_status = params[:"note#{@app_tmp.to_s}"]
-    #zangyo_app_data.save
-      
-    #redirect_to user_path(@user, params:{first_day: params[:date]})
-    #else
-      #flash[:danger] = "不正な時間入力がありました、再入力してください。"
-      #redirect_to edit_attendances_path(@user, params[:date])
-    #end
-    #end
 
     # 勤怠画面(トップ画面)を再表示
     @first_day_l = Date.strptime(params[:date]).beginning_of_month
@@ -181,7 +130,6 @@ class AttendancesController < ApplicationController
     end
     
     def attendances_zangyo_params
-      #params.permit(attendances: [:finished_plan_at, :gyomu_memo])[:attendances]
       params.permit(attendances: [:finished_at])[:attendances]
     end
     

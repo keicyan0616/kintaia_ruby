@@ -47,7 +47,6 @@ class UsersController < ApplicationController
         @apr_status_msg = "#{@apr_user_name}" + "から否認"
       end
     end
-    #@apr_status = Approval.where('user_id = 1').where('target_person_id = ?', params[:id]).where(kintai_req_on: "#{@first_day}").select(:approval_status) #どの承認者に送ったものか(user_id)で絞らないとまだダメかも
     #logger.debug "ここを通ったよ(002-3)"
     
     # 勤怠変更知件数のカウント
@@ -76,7 +75,7 @@ class UsersController < ApplicationController
   end
 
   def update
-    logger.debug "ここを通ったよ(007)"
+    #logger.debug "ここを通ったよ(007)"
     @user = User.find(params[:id])
     if @user.update_attributes(user_params)
       flash[:success] = "ユーザー情報を更新しました。"
@@ -100,13 +99,6 @@ class UsersController < ApplicationController
 
   def update_basic_info
      @user = User.find(params[:id])
-    # @users = User.all
-    
-    # @users.each do |user1|
-    #   if !user1.update_attributes(basic_info_params)
-    #     render 'edit_basic_info'
-    #   end
-    # end
      flash[:success] = "何も更新されません。ページがあるだけです。"
      redirect_to @user   
   end
@@ -135,9 +127,6 @@ class UsersController < ApplicationController
         end
       end
     end
-    #@aps = params[:note4]
-    #@aps = params[:"note#{@app_tmp.to_s}"]
-    #flash[:success] = @shiji_kakunin_id
     flash[:success] = "変更を送信しました。"
     redirect_to @user 
   end
@@ -223,9 +212,6 @@ class UsersController < ApplicationController
         end
       end
     end
-    #@aps = params[:note4]
-    #@aps = params[:"note#{@app_tmp.to_s}"]
-    #flash[:success] = @shiji_kakunin_id
     flash[:success] = "変更を送信しました。"
     redirect_to @user 
   end
@@ -252,7 +238,8 @@ private
   def basic_info_params
     params.require(:user).permit(:basic_work_time, :designated_work_start_time)
   end
-    # beforeアクション
+  
+  # beforeアクション
 
     # ログイン済みユーザーか確認
     def logged_in_user

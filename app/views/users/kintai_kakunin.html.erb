@@ -11,11 +11,7 @@
   <table class = "table-bordered table-condensed">
     <tr>
       <td>
-        <%#= link_to "←", user_path(params: {id: @user.id, first_day: @first_day.prev_month }),
-                         class: "btn btn-xs btn-primary" %>
         &emsp;<%= @first_day.to_s(:year_month) %>　時間管理表&emsp;
-        <%#= link_to "→", user_path(params: {id: @user.id, first_day: @first_day.next_month }),
-                         class: "btn btn-xs btn-primary" %>
       </td>
       <td>
         指定勤務開始時間　<%= format_basic_time(@user.designated_work_start_time) %><br>
@@ -33,26 +29,7 @@
       <td>締日　<%= @last_day.to_s(:date) %></td>
     </tr>
   </table>
-  
-  <!-- お知らせボタン(文字列リンク)関係 -->
-  <!--
-  <div class = "link-shozoku">
-    <%#= link_to "【所属長承認申請のお知らせ】", shinsei_kintai_path(@user), remote: true, class: "shozoku-info", :style=>"color:red" %>
-  </div>
-  <div><%#= link_to "【勤怠変更申請のお知らせ】", "#", class: "kintai-info" %></div>
-  <div><%#= link_to "【残業申請のお知らせ】", "#", class: "zangyou-info" %></div>
-  -->
-  
-  <!-- 各種機能ボタン関係 -->
-  <!--
-  <div class = "btn-csv">
-    <%#= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
-    <%#= link_to "CSV出力", "#", class: "btn btn-primary" %>
-  </div>
-  <div class = "btn-log">
-    <%#= link_to "勤怠修正ログ(承認済み)", "#", class: "btn btn-primary" %>
-  </div>
-  -->
+
   <div>&emsp;</div>
   <!-- 勤怠明細部 -->
   <table class = "table-bordered table-condensed table-hover">
@@ -97,7 +74,7 @@
           end
         %>
         <tr>
-          <td><%#= link_to "残業申請", "#", class: "btn btn-primary btn-zan-shinsei" %></td>
+          <td></td>
           <td><%= day.worked_on.to_s(:date) %></td>
           <td class="<%= css_class %>"><%= %w{日 月 火 水 木 金 土}[day.worked_on.wday] %></td>
           <td><%= day.started_at.to_s(:hour) if day.started_at.present? %></td>
@@ -122,9 +99,6 @@
           </td>
           <!-- 出社ボタン表示 -->
           <td>
-            <%# if day.worked_on == Date.today && day.started_at.nil? %>
-              <%#= button_to "出社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
-            <%# end %>
           </td>
           <!-- 退勤時間表示 -->
           <td><%= day.finished_at.to_s(:hour) if day.finished_at.present? %></td>
@@ -148,9 +122,8 @@
             <% end %>
           </td>
           <td>
-            <%# if day.worked_on == Date.today && day.started_at.present? && day.finished_at.nil? %>
-              <%#= button_to "退社", user_attendances_path(@user), class: "btn btn-xs btn-primary" %>
-            <%# end %>
+          </td>
+          <!-- 在社時間(計算) -->
           <td>
             <% if day.started_at.present? && day.finished_at.present? %>
               <% @diff_sec = (Time.parse(day.finished_at.to_s(:hour) + ":" + finish_min) - Time.parse(day.started_at.to_s(:hour) + ":" + start_min)).to_i %>
@@ -173,14 +146,14 @@
           <% zangyo_status_msg = "" %>
           <% if @zangyo_shinsei_data.present? %>
             <!-- 終了予定時間(時) -->
-            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:hour) if day.finished_plan_at.present? %></td>
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:hour) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
             <!-- 終了予定時間(分) -->
-            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:min) if @zangyo_shinsei_data.zangyo_finished_at.present? %><%#= day.finished_plan_at.to_s(:min) if day.finished_plan_at.present? %></td>
+            <td><%= @zangyo_shinsei_data.zangyo_finished_at.to_s(:min) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
             <!-- 時間外時間 -->
             <% @calc_work_datetime = Time.parse(@zangyo_shinsei_data.zangyo_aprvl_req_on.strftime("%Y-%m-%d") + " " + @user.designated_work_end_time.strftime("%H:%M") + " +0900") %>
             <td><%= working_times(@calc_work_datetime, @zangyo_shinsei_data.zangyo_finished_at) if @zangyo_shinsei_data.zangyo_finished_at.present? %></td>
             <!-- 業務処理内容 -->
-            <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %><%#= day.gyomu_memo %></td>
+            <td><%= @zangyo_shinsei_data.zangyo_note if @zangyo_shinsei_data.zangyo_note.present? %></td>
             <!-- 指示者確認㊞の元文字作成-->
             <% zangyo_aprvl_status_l = @zangyo_shinsei_data.zangyo_aprvl_status %>
             <% if zangyo_aprvl_status_l == "申請中" %>
