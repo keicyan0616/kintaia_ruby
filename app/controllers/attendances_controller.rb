@@ -9,6 +9,12 @@ class AttendancesController < ApplicationController
     
     if @attendance.started_at.nil?
       @attendance.update_attributes(started_at: Time.current.floor_to(15.minutes))
+      
+      # 初期値設定のため勤怠編集テーブルの該当日データ作成
+      unless @editaprvl.present?
+        @editaprvl = @user.editaprvls.build(change_kintai_req_on: Date.current)
+        @editaprvl.save
+      end
       @editaprvl.update_attributes(change_started_at: Time.current.floor_to(15.minutes)) if @editaprvl.change_started_at.nil?
       
       flash[:info] = 'おはようございます。'
