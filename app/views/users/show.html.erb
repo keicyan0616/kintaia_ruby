@@ -254,6 +254,8 @@
           
           <!-- 勤怠変更申請データの取得(原則1件のみのためfind_byを使用) -->
           <% @editaprvl_shinsei_data = Editaprvl.find_by(user_id: params[:id], change_kintai_req_on: "#{day.worked_on}") %>
+          <%# @editaprvl_shinsei_data = Editaprvl.where(user_id: params[:id]).where(change_kintai_req_on: "#{day.worked_on}")\
+                                       .joins('INNER JOIN users ON editaprvls.change_target_person_id = users.id')%>
           <% change_status_msg = "" %>
           <% if @editaprvl_shinsei_data.present? %>
             <!-- 指示者確認㊞の元文字作成-->
