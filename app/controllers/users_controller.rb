@@ -1,17 +1,17 @@
 class UsersController < ApplicationController
-  before_action :logged_in_user, only: [:edit, :show, :kintai_kakunin, :index, :update, :destroy, :edit_basic_info, :update_basic_info]
+  before_action :logged_in_user, only: [:edit, :show, :kintai_kakunin, :index, :destroy, :edit_basic_info, :update_basic_info]
   before_action :correct_user,   only: [:edit, :show]
-  before_action :admin_user,     only: [:index, :update, :destroy, :edit_basic_info, :update_basic_info]
+  before_action :admin_user,     only: [:index, :destroy, :edit_basic_info, :update_basic_info]
   before_action :superior_user,  only: [:kintai_kakunin]
   before_action :not_admin_user, only: [:show]
-  #before_action :correct_or_admin_user, only: [:show, :update]
+  before_action :correct_or_admin_user, only: [:update]
   #before_action :correct_or_superior_user, only: [:update]
   protect_from_forgery except: :soushin_kintai # soushin_kintaiアクションを除外
   
   # ### ユーザー一覧表示 #####
   def index
       #logger.debug "ここを通ったよ(001)"
-      @users = User.paginate(page: params[:page]).search(params[:search])
+      @users = User.paginate(page: params[:page]).search(params[:search]).order(id: :asc)
   end
 
   # ### 勤怠表示 #####
@@ -30,7 +30,7 @@ class UsersController < ApplicationController
     @worked_sum = @dates.where.not(started_at: nil).count
 
     # 勤怠申請通知件数のカウント
-    @apr_cnt = Approval.where('user_id = ?', params[:id]).where(approval_status: '申請中').count
+    @apr_cnt = Approval.where('user_id = ?', params[:id]).where(approval_status: '申請中').joins('INNER JOIN users ON approvals.target_person_id = users.id').count
     
     # 勤怠申請データの取得(原則1件のみのためfind_byを使用)
     @apr_shinsei_data = Approval.find_by(target_person_id: params[:id], kintai_req_on: @first_day)
@@ -49,11 +49,12 @@ class UsersController < ApplicationController
     end
     #logger.debug "ここを通ったよ(002-3)"
     
-    # 勤怠変更知件数のカウント
+    # 勤怠変更通知件数のカウント
     @edit_aprvl_cnt = Editaprvl.where('change_target_person_id = ?', params[:id]).where(change_aprvl_status: '申請中').count
     
     # 残業申請通知件数のカウント
-    @zangyo_aprvl_cnt = Zangyoaprvl.where('user_id = ?', params[:id]).where(zangyo_aprvl_status: '申請中').where.not(zangyo_finished_at: nil).count
+    @zangyo_aprvl_cnt = Zangyoaprvl.where('user_id = ?', params[:id]).where(zangyo_aprvl_status: '申請中').where.not(zangyo_finished_at: nil)\
+                        .joins('INNER JOIN users ON zangyoaprvls.zangyo_target_person_id = users.id').count
   end
 
   def new
@@ -113,13 +114,15 @@ class UsersController < ApplicationController
   def kintai_shinsei
     #logger.debug "ここを通ったよ(003)"
     @user = User.find(params[:id])
-    @apr = Approval.where('user_id = ?', params[:id]).where.not(approval_status: "承認").where.not(approval_status: "否認").order(target_person_id: :asc).order(kintai_req_on: :asc)
+    @apr = Approval.where('user_id = ?', params[:id]).where.not(approval_status: "承認").where.not(approval_status: "否認").order(target_person_id: :asc)\
+          .joins('INNER JOIN users ON approvals.target_person_id = users.id').order(kintai_req_on: :asc)
   end
 
   def soushin_kintai
     #logger.debug "ここを通ったよ(005)"
     @user = User.find(params[:id])
-    @apr = Approval.where('user_id = ?', params[:id]).where.not(approval_status: "承認").where.not(approval_status: "否認").order(target_person_id: :asc).order(kintai_req_on: :asc)
+    @apr = Approval.where('user_id = ?', params[:id]).where.not(approval_status: "承認").where.not(approval_status: "否認").order(target_person_id: :asc)\
+          .joins('INNER JOIN users ON approvals.target_person_id = users.id').order(kintai_req_on: :asc)
     
     @apr.each do |app_data|
       @app_tmp = app_data.id
@@ -205,8 +208,10 @@ class UsersController < ApplicationController
   def zangyo_shinsei_approval
     #logger.debug "ここを通ったよ(012)"
     @user = User.find(params[:id])
+    #@zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where.not(zangyo_aprvl_status: "否認").where(yuko_flag: 1)\
+    #              .order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
     @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where.not(zangyo_aprvl_status: "否認").where(yuko_flag: 1)\
-                  .order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
+                  .joins('INNER JOIN users ON zangyoaprvls.zangyo_target_person_id = users.id').order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
   end
   
   # 2-2.残業申請承認(残業申請承認モーダル画面)
@@ -214,7 +219,7 @@ class UsersController < ApplicationController
     #logger.debug "ここを通ったよ(013)"
     @user = User.find(params[:id])
     @zangyo_apr = Zangyoaprvl.where('user_id = ?', params[:id]).where.not(zangyo_aprvl_status: "承認").where.not(zangyo_aprvl_status: "否認").where(yuko_flag: 1)\
-                  .order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
+                  .joins('INNER JOIN users ON zangyoaprvls.zangyo_target_person_id = users.id').order(zangyo_target_person_id: :asc).order(zangyo_aprvl_req_on: :asc)
     
     @zangyo_apr.each do |zangyo_app_data|
       @app_tmp = zangyo_app_data.id

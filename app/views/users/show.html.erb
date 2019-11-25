@@ -184,7 +184,6 @@
           <!-- 退勤時間表示 -->
           <td><%= day.finished_at.to_s(:hour) if day.finished_at.present? %></td>
           <td>
-            <%#= day.finished_at.to_s(:min) if day.finished_at.present? %>
             <% if day.finished_at.present? %>
               <% if day.finished_at.to_s(:min).to_i >= 0 && day.finished_at.to_s(:min).to_i <= 14 %>
                 <%= "00" %>

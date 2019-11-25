@@ -5,11 +5,17 @@ class AttendancesController < ApplicationController
   def create
     @user = User.find(params[:user_id])
     @attendance = @user.attendances.find_by(worked_on: Date.current)
+    @editaprvl = @user.editaprvls.find_by(change_kintai_req_on: Date.current)
+    
     if @attendance.started_at.nil?
-      @attendance.update_attributes(started_at: current_time)
+      @attendance.update_attributes(started_at: Time.current.floor_to(15.minutes))
+      @editaprvl.update_attributes(change_started_at: Time.current.floor_to(15.minutes)) if @editaprvl.change_started_at.nil?
+      
       flash[:info] = 'おはようございます。'
     elsif @attendance.finished_at.nil?
-      @attendance.update_attributes(finished_at: current_time)
+      @attendance.update_attributes(finished_at: Time.current.floor_to(15.minutes))
+      @editaprvl.update_attributes(change_finished_at: Time.current.floor_to(15.minutes)) if @editaprvl.change_finished_at.nil?
+
       flash[:info] = 'おつかれさまでした。'
     else
       flash[:danger] = 'トラブルがあり、登録出来ませんでした。'
@@ -115,7 +121,7 @@ class AttendancesController < ApplicationController
     @user = User.find(params[:id])
     @first_day = first_day(params[:date])
     @last_day = @first_day.end_of_month
-    @attendances = @user.attendances.where("worked_on >= ?", @first_day).where("worked_on <= ?", @last_day)
+    @attendances = @user.attendances.where("worked_on >= ?", @first_day).where("worked_on <= ?", @last_day).order(worked_on: :asc)
 
     respond_to do |format|
       format.csv do

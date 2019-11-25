@@ -37,8 +37,22 @@
               <% else %>
                 <% readOnlyFlg = false %>
               <% end %>
-              <td><%= af.time_select :change_started_at, {:minute_step => 15, :include_blank => true}, {:class => "form-control bootstrap-date", :disabled => readOnlyFlg} %></td>
-              <td><%= af.time_select :change_finished_at, {:minute_step => 15, :include_blank => true}, {:class => "form-control bootstrap-date", :disabled => readOnlyFlg} %></td>
+              
+              <%# @att_data = Attendance.find_by(worked_on: day.change_kintai_req_on, user_id: @user.id) %>
+              <td>
+                <%#= @att_data.started_at.strftime("%H:%M") + " ⇒ " if @att_data.started_at.present? %>
+                <%# if @att_data.started_at.present? %>
+                  <!--<br>-->
+                <%# end %>
+                <%= af.time_select :change_started_at, {:minute_step => 15, :include_blank => true}, {:class => "form-control bootstrap-date", :disabled => readOnlyFlg} %>
+              </td>
+              <td>
+                <%#= @att_data.finished_at.strftime("%H:%M") + " ⇒ " if @att_data.finished_at.present? %>
+                <%# if @att_data.finished_at.present? %>
+                  <!--<br>-->
+                <%# end %>
+                <%= af.time_select :change_finished_at, {:minute_step => 15, :include_blank => true}, {:class => "form-control bootstrap-date", :disabled => readOnlyFlg} %>
+              </td>
               <!--翌日退社時間が翌日だったら、チェックが自動で入る -->
               <td>
                 <% @yokujitsu_flag = 0 %>

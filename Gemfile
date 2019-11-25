@@ -18,6 +18,7 @@ gem 'rails-i18n'
 gem 'activerecord-import'
 gem 'roo'
 gem 'jquery-turbolinks'
+gem 'rounding'
 
 group :development, :test do
   gem 'sqlite3', '1.3.13'
